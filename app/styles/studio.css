@@ -2013,3 +2013,85 @@
   .export-backdrop,
   .export-modal { animation: none; }
 }
+
+/* Editable intent field */
+.xintu-prompt-editor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.xintu-prompt-editor.desktop {
+  height: 100%;
+  min-height: 52px;
+}
+
+.xintu-prompt-editor.mobile {
+  flex: 0 0 52px;
+  height: 52px;
+}
+
+.xintu-prompt-textarea {
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0 4px 18px 0;
+  resize: none;
+  color: rgba(220, 220, 226, 0.96);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  font-family: var(--lab-font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0;
+  caret-color: #d9c5ee;
+  -webkit-text-fill-color: currentColor;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.xintu-prompt-editor.desktop .xintu-prompt-textarea {
+  flex: 1;
+  height: 100%;
+}
+
+.xintu-prompt-editor.mobile .xintu-prompt-textarea {
+  height: 100%;
+  padding-bottom: 14px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.xintu-prompt-textarea::placeholder {
+  color: rgba(196, 196, 204, 0.45);
+  opacity: 1;
+}
+
+.xintu-prompt-textarea:focus {
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: 0 0 0 1px rgba(216, 194, 235, 0.34);
+}
+
+.xintu-prompt-count {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  color: rgba(196, 196, 204, 0.42);
+  font-family: var(--lab-font-mono);
+  font-size: 9px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.border-shell-9_385:focus-within .border-line-9_385,
+.border-shell-9_1592:focus-within .border-line-9_1592 {
+  border-color: rgba(216, 194, 235, 0.52);
+  box-shadow: 0 0 0 1px rgba(216, 194, 235, 0.12);
+}

@@ -437,7 +437,7 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
     if (screen === "results") return isMobile ? <Frame91617 /> : <Frame91406 />;
     if (screen === "export") return <Frame91696 />;
     if (screen === "error") return <Frame91872 />;
-    return isMobile ? <Frame91569 /> : <Frame9345 />;
+    return isMobile ? <Frame91569 prompt={studio.prompt} onPromptChange={studio.setPrompt} /> : <Frame9345 prompt={studio.prompt} onPromptChange={studio.setPrompt} />;
   };
 
   return (

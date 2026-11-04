@@ -1,6 +1,11 @@
 "use client";
 
-const Frame9345 = () => (
+type Frame9345Props = {
+  prompt: string;
+  onPromptChange: (value: string) => void;
+};
+
+const Frame9345 = ({ prompt, onPromptChange }: Frame9345Props) => (
         <div className="scroll-container">
             <div
                 id="9_345"
@@ -255,20 +260,18 @@ const Frame9345 = () => (
                                                 <div className="border-line-9_385"></div>
                                                 <div className="x-frame-9_385-content-layer">
                                                     <div className="layout-content-9_385 x-relative-flex">
-                                                        <p
-                                                            id="9_386"
-                                                            className="x-copy-9_386 x-relative-no-shrink"
-                                                        >
-                                                            {
-                                                                "例如：日系、通透，肤色自然，保留皮肤纹理。"
-                                                            }
-                                                        </p>
-                                                        <p
-                                                            id="9_387"
-                                                            className="x-copy-9_387 x-relative-no-shrink"
-                                                        >
-                                                            {"0 / 500"}
-                                                        </p>
+                                                        <div className="xintu-prompt-editor desktop">
+                                                            <textarea
+                                                                id="xintu-prompt-desktop"
+                                                                className="xintu-prompt-textarea"
+                                                                aria-label="描述你想要的调色效果"
+                                                                maxLength={500}
+                                                                placeholder="例如：日系、通透，肤色自然，保留皮肤纹理。"
+                                                                value={prompt}
+                                                                onChange={(event) => onPromptChange(event.target.value)}
+                                                            />
+                                                            <span className="xintu-prompt-count">{prompt.length} / 500</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

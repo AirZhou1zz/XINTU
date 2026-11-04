@@ -1,6 +1,11 @@
 "use client";
 
-const Frame91569 = () => (
+type Frame91569Props = {
+  prompt: string;
+  onPromptChange: (value: string) => void;
+};
+
+const Frame91569 = ({ prompt, onPromptChange }: Frame91569Props) => (
         <div className="scroll-container">
             <div
                 id="9_1569"
@@ -117,12 +122,18 @@ const Frame91569 = () => (
                                     >
                                         {"描述你想要的气氛"}
                                     </p>
-                                    <p
-                                        id="9_1594"
-                                        className="x-copy-9_1594 x-relative-no-shrink"
-                                    >
-                                        {"日系通透，肤色自然，保留皮肤纹理。"}
-                                    </p>
+                                    <div className="xintu-prompt-editor mobile">
+                                        <textarea
+                                            id="xintu-prompt-mobile"
+                                            className="xintu-prompt-textarea"
+                                            aria-label="描述你想要的调色效果"
+                                            maxLength={500}
+                                            placeholder="例如：日系、通透，肤色自然，保留皮肤纹理。"
+                                            value={prompt}
+                                            onChange={(event) => onPromptChange(event.target.value)}
+                                        />
+                                        <span className="xintu-prompt-count">{prompt.length} / 500</span>
+                                    </div>
                                     <div
                                         id="9_1595"
                                         className="x-frame-9_1595 x-relative-no-shrink x-flex"
