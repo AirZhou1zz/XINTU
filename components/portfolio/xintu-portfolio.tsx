@@ -23,6 +23,8 @@ import styles from "./xintu-portfolio.module.css";
 const demoUrl = "https://xintu-demo.vercel.app";
 const githubUrl = "https://github.com/AirZhou1zz/XINTU";
 const releaseUrl = "https://github.com/AirZhou1zz/XINTU/releases/tag/v0.1.0";
+const assetBase = process.env.NEXT_PUBLIC_PORTFOLIO_BASE_PATH ?? "";
+const portfolioAsset = (name: string) => `${assetBase}/portfolio/${name}`;
 
 const principles = [
   {
@@ -100,8 +102,8 @@ export function XintuPortfolio() {
           <a href="#boundary">边界</a>
         </nav>
 
-        <a className={styles.navCta} href={demoUrl} target="_blank" rel="noreferrer">
-          体验产品 <ArrowUpRight size={14} />
+        <a className={styles.navCta} href="#evidence">
+          查看证据 <ArrowDown size={14} />
         </a>
       </header>
 
@@ -124,11 +126,11 @@ export function XintuPortfolio() {
             </p>
 
             <div className={styles.heroActions}>
-              <a className={styles.primaryCta} href={demoUrl} target="_blank" rel="noreferrer">
-                体验完整产品 <ArrowUpRight size={16} />
+              <a className={styles.primaryCta} href="#evidence">
+                查看产品演示 <ArrowDown size={16} />
               </a>
-              <a className={styles.secondaryCta} href={githubUrl} target="_blank" rel="noreferrer">
-                查看 GitHub <GitBranch size={15} />
+              <a className={styles.secondaryCta} href={demoUrl} target="_blank" rel="noreferrer">
+                打开 Live Demo <ArrowUpRight size={15} />
               </a>
             </div>
 
@@ -153,7 +155,7 @@ export function XintuPortfolio() {
               </div>
               <div className={styles.previewMedia}>
                 <Image
-                  src="/portfolio/hero-demo.gif"
+                  src={portfolioAsset("hero-demo.gif")}
                   alt="XINTU 产品流程：上传照片、生成候选、对比和导出"
                   width={960}
                   height={540}
@@ -273,15 +275,15 @@ export function XintuPortfolio() {
 
           <div className={styles.fieldStrip}>
             <div className={styles.fieldPhoto}>
-              <Image src="/portfolio/portrait.webp" alt="人像测试场景" fill sizes="(max-width: 700px) 70vw, 30vw" />
+              <Image src={portfolioAsset("portrait.webp")} alt="人像测试场景" fill sizes="(max-width: 700px) 70vw, 30vw" />
               <span>PORTRAIT / SKIN TONE</span>
             </div>
             <div className={styles.fieldPhoto}>
-              <Image src="/portfolio/landscape.webp" alt="旅行风景测试场景" fill sizes="(max-width: 700px) 70vw, 30vw" />
+              <Image src={portfolioAsset("landscape.webp")} alt="旅行风景测试场景" fill sizes="(max-width: 700px) 70vw, 30vw" />
               <span>LANDSCAPE / SKY</span>
             </div>
             <div className={styles.fieldPhoto}>
-              <Image src="/portfolio/film.webp" alt="电影感氛围测试场景" fill sizes="(max-width: 700px) 70vw, 30vw" />
+              <Image src={portfolioAsset("film.webp")} alt="电影感氛围测试场景" fill sizes="(max-width: 700px) 70vw, 30vw" />
               <span>FILM / MEMORY</span>
             </div>
             <div className={styles.fieldCopy}>
@@ -296,7 +298,7 @@ export function XintuPortfolio() {
           <div className={styles.evidenceVisual}>
             <a href={demoUrl} target="_blank" rel="noreferrer" aria-label="打开 XINTU 在线 Demo">
               <Image
-                src="/portfolio/live-qwen-export.png"
+                src={portfolioAsset("live-qwen-export.png")}
                 alt="XINTU 使用 Qwen 3.8 完成真实调色与导出的界面"
                 width={1280}
                 height={720}
@@ -424,8 +426,12 @@ export function XintuPortfolio() {
             </p>
           </div>
           <div className={styles.finalActions}>
+            <a href="#workflow">
+              <span>查看产品工作流</span>
+              <ArrowDown size={20} />
+            </a>
             <a href={demoUrl} target="_blank" rel="noreferrer">
-              <span>打开在线 Demo</span>
+              <span>打开 Live Demo</span>
               <ArrowUpRight size={20} />
             </a>
             <a href={githubUrl} target="_blank" rel="noreferrer">

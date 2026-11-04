@@ -2,7 +2,7 @@
 
 ### Reference-based AI color grading that never generates pixels.
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [Recruiter portfolio](https://xintu-demo.vercel.app/portfolio)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Recruiter portfolio](https://airzhou1zz.github.io/XINTU/portfolio/)
 
 [![CI](https://github.com/AirZhou1zz/XINTU/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AirZhou1zz/XINTU/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3d6b57.svg)](LICENSE)
@@ -14,7 +14,7 @@
 **XINTU is a bounded image-agent experiment for reference-based color grading.** The model interprets the image and the requested look, plans a small set of grading operations, and emits structured parameters. The original pixels are rendered locally with Canvas 2D. It does not generate a new scene, replace the sky, or alter a person's identity.
 
 <p>
-  <a href="https://xintu-demo.vercel.app/portfolio"><strong>AI PM portfolio</strong></a>
+  <a href="https://airzhou1zz.github.io/XINTU/portfolio/"><strong>AI PM portfolio</strong></a>
   ·
   <a href="https://xintu-demo.vercel.app"><strong>Try the free demo</strong></a>
   ·
@@ -27,7 +27,7 @@
 
 ## Recruiter portfolio
 
-A mobile-first case study is available at [xintu-demo.vercel.app/portfolio](https://xintu-demo.vercel.app/portfolio). The print-ready QR card is available at [docs/resume-qr-card.png](docs/resume-qr-card.png).
+A mobile-first case study is available at [airzhou1zz.github.io/XINTU/portfolio/](https://airzhou1zz.github.io/XINTU/portfolio/). The print-ready QR card is available at [docs/resume-qr-card.png](docs/resume-qr-card.png).
 
 ## Why XINTU?
 

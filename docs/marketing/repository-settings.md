@@ -11,7 +11,7 @@ Reference-based AI color grading agent for photos. Bounded planning, local Canva
 ## Website
 
 ```text
-https://xintu-demo.vercel.app/portfolio
+https://airzhou1zz.github.io/XINTU/portfolio/
 ```
 
 ## Topics

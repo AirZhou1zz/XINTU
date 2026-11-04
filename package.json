@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "portfolio:qr": "node scripts/generate-portfolio-qr.mjs"
+    "portfolio:qr": "node scripts/generate-portfolio-qr.mjs",
+    "portfolio:pages": "node scripts/export-portfolio-pages.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
