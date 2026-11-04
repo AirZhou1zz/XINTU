@@ -15,6 +15,10 @@
 
 ![公开 Demo 结果](docs/public-demo.png)
 
+真实 Qwen 3.8 视觉分析与 PNG 导出效果（私有部署）：
+
+![真实 Qwen 3.8 调色与导出](docs/live-qwen-export.png)
+
 ### 别人如何了解这个项目
 
 1. 打开公开 Mock Demo，直接体验完整产品交互。
