@@ -61,6 +61,20 @@ describe("mock provider and candidates", () => {
     expect(output.rationale).toContain("修正");
   });
 
+  it("maps manual language feedback into bounded refinements", async () => {
+    const provider = new MockProvider();
+    const output = await provider.refine({
+      prompt: "冷调夜景\n追加反馈：更暖一点，高光柔和一点",
+      strength: "medium",
+      params: testParams,
+      findings: ["用户追加反馈：更暖一点，高光柔和一点"],
+      iteration: 0,
+      mode: "manual",
+    });
+    expect(output.params.temperature).toBeGreaterThan(testParams.temperature);
+    expect(output.params.highlights).toBeLessThan(testParams.highlights);
+    expect(output.rationale).toContain("根据");
+  });
   it("builds three bounded variants", () => {
     const base = testParams;
     const variants = buildCandidateVariants(base);

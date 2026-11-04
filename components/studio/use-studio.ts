@@ -30,6 +30,11 @@ export type LoadedImageState = {
   name: string;
 };
 
+export type StudioConversationMessage = {
+  role: "user" | "assistant";
+  text: string;
+};
+
 const defaultTrace: TraceStep[] = [
   { id: "plan", label: "PLAN", status: "idle", detail: "等待理解画面与用户意图。" },
   { id: "apply", label: "APPLY", status: "idle", detail: "等待选择调色工具。" },
@@ -64,6 +69,9 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [trace, setTrace] = useState<TraceStep[]>(defaultTrace);
   const [iterations, setIterations] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState<number | null>(null);
+  const [manualRefinements, setManualRefinements] = useState(0);
+  const [conversation, setConversation] = useState<StudioConversationMessage[]>([]);
   const renderTimerRef = useRef<number | null>(null);
 
   const activeCandidate = useMemo(
@@ -86,6 +94,9 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     setEvaluation(null);
     setTrace(defaultTrace);
     setIterations(0);
+    setElapsedMs(null);
+    setManualRefinements(0);
+    setConversation([]);
     setStatus("idle");
     setError(null);
   }, []);
@@ -175,8 +186,12 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       return false;
     }
 
+    const startedAt = performance.now();
     setStatus("analyzing");
     setError(null);
+    setElapsedMs(null);
+    setManualRefinements(0);
+    setConversation([]);
     setCandidates([]);
     setActiveCandidateId(null);
     setEvaluation(null);
@@ -241,6 +256,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
               params,
               findings: evaluation.findings,
               iteration,
+              mode: "auto",
             }),
           });
           if (!refineResponse.ok) {
@@ -307,9 +323,12 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
           },
         ),
       );
+      setElapsedMs(Math.round(performance.now() - startedAt));
+      setConversation([{ role: "assistant", text: "已生成 3 个候选。满意可以直接导出，也可以继续告诉我哪里需要调整。" }]);
       setStatus("done");
       return true;
     } catch (analyzeError) {
+      setElapsedMs(Math.round(performance.now() - startedAt));
       setStatus("error");
       setError(analyzeError instanceof Error ? analyzeError.message : "生成失败，请稍后重试。");
       setTrace((current) => setTraceStep(current, "evaluate", { status: "error", detail: "生成流程中断，请重试。" }));
@@ -317,6 +336,67 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     }
   }, [prompt, reference, strength, target]);
 
+  const refineFromFeedback = useCallback(async (feedback: string) => {
+    const message = feedback.trim();
+    if (!target || !activeCandidate || !message) return false;
+
+    setStatus("refining");
+    setError(null);
+    setConversation((current) => [...current, { role: "user", text: message }]);
+
+    try {
+      const effectivePrompt = `${prompt.trim()}\n追加反馈：${message}`.slice(0, 500);
+      const findings = [
+        `用户追加反馈：${message}`.slice(0, 220),
+        ...activeCandidate.evaluation.findings,
+      ].slice(0, 8);
+      const response = await fetch("/api/agent/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: effectivePrompt,
+          strength,
+          params: activeCandidate.params,
+          findings,
+          iteration: Math.min(2, manualRefinements),
+          mode: "manual",
+        }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error || "继续修正失败。");
+      }
+
+      const refined = refineResponseSchema.parse(await response.json());
+      const pixels = renderColorGrade(target.pixels, refined.params);
+      const nextEvaluation = evaluateImage(target.pixels, pixels, reference?.pixels ?? null, true);
+      const nextCandidate: Candidate = {
+        ...activeCandidate,
+        params: refined.params,
+        pixels,
+        imageUrl: previewUrl(pixels),
+        evaluation: nextEvaluation,
+      };
+
+      setCandidates((current) => current.map((candidate) => (
+        candidate.id === activeCandidate.id ? nextCandidate : candidate
+      )));
+      setEvaluation(nextEvaluation);
+      setManualRefinements((current) => current + 1);
+      setTrace((current) => setTraceStep(current, "refine", {
+        status: nextEvaluation.pass ? "passed" : "warning",
+        detail: refined.rationale,
+      }));
+      setConversation((current) => [...current, { role: "assistant", text: refined.rationale }]);
+      setStatus("done");
+      return true;
+    } catch (refineError) {
+      const messageText = refineError instanceof Error ? refineError.message : "继续修正失败。";
+      setConversation((current) => [...current, { role: "assistant", text: `这次调整没有完成：${messageText}` }]);
+      setStatus("done");
+      return false;
+    }
+  }, [activeCandidate, manualRefinements, prompt, reference, strength, target]);
   const resetActiveParams = useCallback(() => {
     if (!target || !activeCandidate) return;
     const rendered = renderColorGrade(target.pixels, activeCandidate.aiParams);
@@ -355,6 +435,9 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     evaluation,
     trace,
     iterations,
+    elapsedMs,
+    manualRefinements,
+    conversation,
     isBusy,
     loadTarget,
     loadReference,
@@ -364,6 +447,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     analyze,
     updateParam,
     resetActiveParams,
+    refineFromFeedback,
     download,
     resetResults,
     setError,

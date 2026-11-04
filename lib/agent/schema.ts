@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 import { colorParamsSchema } from "@/lib/color/schema";
 
 const imageDataUrl = z
@@ -27,6 +27,7 @@ export const refineRequestSchema = z
     params: colorParamsSchema,
     findings: z.array(z.string().min(1).max(220)).min(1).max(8),
     iteration: z.number().int().min(0).max(2),
+    mode: z.enum(["auto", "manual"]).optional(),
   })
   .strict();
 

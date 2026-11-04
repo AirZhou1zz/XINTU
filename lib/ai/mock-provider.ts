@@ -1,4 +1,4 @@
-﻿import type { AgentPlan, ColorParams, Strength } from "@/lib/color/types";
+import type { AgentPlan, ColorParams, Strength } from "@/lib/color/types";
 import { colorParamsSchema } from "@/lib/color/schema";
 import type { AnalyzeInput, AnalyzeOutput, ColorProvider, RefineInput, RefineOutput } from "./provider";
 
@@ -59,7 +59,48 @@ export class MockProvider implements ColorProvider {
   async refine(input: RefineInput): Promise<RefineOutput> {
     const next = { ...input.params };
     const joined = input.findings.join(" ");
-    if (joined.includes("肤色")) {
+    const manualFeedback = input.mode === "manual"
+      ? input.prompt.split("追加反馈：").at(-1)?.trim() ?? input.prompt
+      : "";
+
+    if (manualFeedback) {
+      if (manualFeedback.includes("暖")) {
+        next.temperature = clamp(next.temperature + 7, -100, 100);
+        next.skinWarmth = clamp(next.skinWarmth + 4, -100, 100);
+      }
+      if (manualFeedback.includes("冷")) {
+        next.temperature = clamp(next.temperature - 7, -100, 100);
+        next.tint = clamp(next.tint + 2, -100, 100);
+      }
+      if (manualFeedback.includes("自然")) {
+        next.saturation = clamp(next.saturation - 5, -100, 100);
+        next.contrast = clamp(next.contrast - 3, -100, 100);
+        next.clarity = clamp(next.clarity - 3, -100, 100);
+      }
+      if (manualFeedback.includes("通透")) {
+        next.dehaze = clamp(next.dehaze + 7, -100, 100);
+        next.exposure = clamp(next.exposure + 2, -100, 100);
+        next.clarity = clamp(next.clarity + 3, -100, 100);
+      }
+      if (manualFeedback.includes("胶片")) {
+        next.grain = clamp(next.grain + 7, 0, 100);
+        next.saturation = clamp(next.saturation - 3, -100, 100);
+        next.highlights = clamp(next.highlights - 3, -100, 100);
+      }
+      if (manualFeedback.includes("高光")) next.highlights = clamp(next.highlights - 7, -100, 100);
+      if (manualFeedback.includes("阴影")) next.shadows = clamp(next.shadows + 6, -100, 100);
+      if (manualFeedback.includes("肤色") || manualFeedback.includes("皮肤")) {
+        next.skinWarmth = clamp(next.skinWarmth - 5, -100, 100);
+        next.saturation = clamp(next.saturation - 3, -100, 100);
+      }
+      if (manualFeedback.includes("颗粒")) next.grain = clamp(next.grain + 5, 0, 100);
+      if (manualFeedback.includes("饱和")) {
+        next.saturation = clamp(next.saturation + (manualFeedback.includes("不要") || manualFeedback.includes("降低") ? -7 : 5), -100, 100);
+      }
+      if (manualFeedback.includes("对比")) {
+        next.contrast = clamp(next.contrast + (manualFeedback.includes("不要") || manualFeedback.includes("降低") ? -6 : 5), -100, 100);
+      }
+    }    if (joined.includes("肤色")) {
       next.skinWarmth = clamp(next.skinWarmth - 8, -100, 100);
       next.saturation = clamp(next.saturation - 6, -100, 100);
       next.temperature = clamp(next.temperature - 2, -100, 100);
@@ -84,7 +125,9 @@ export class MockProvider implements ColorProvider {
     }
     return {
       params: colorParamsSchema.parse(next),
-      rationale: `第 ${input.iteration + 1} 轮修正：根据评估结果收敛了 ${input.findings[0] ?? "主要偏差"}。`,
+      rationale: input.mode === "manual" && manualFeedback
+        ? `已根据“${manualFeedback.slice(0, 42)}”调整参数并重新评估。`
+        : `第 ${input.iteration + 1} 轮修正：根据评估结果收敛了 ${input.findings[0] ?? "主要偏差"}。`,
       provider: this.name,
     };
   }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowLeftRight } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, SlidersHorizontal } from "lucide-react";
+import { ManualParameterPanel } from "./manual-parameter-panel";
 import { useStudio } from "@/components/studio/use-studio";
 import Frame91309 from "./frames/Frame91309";
 import Frame91406 from "./frames/Frame91406";
@@ -39,7 +40,7 @@ const appNodeIds = new Set([
   "9_235", "9_236", "9_237", "9_238", "9_245", "9_247", "9_264", "9_277", "9_283", "9_289", "9_333", "9_340",
   "9_351", "9_352", "9_353", "9_374", "9_376", "9_389", "9_391", "9_393", "9_395",
   "9_402", "9_403", "9_405", "9_406", "9_428", "9_1581", "9_1567", "9_1506", "9_1512", "9_1518",
-  "9_1315", "9_1316", "9_1317", "9_1412", "9_1413", "9_1414", "9_1542",
+  "9_1315", "9_1316", "9_1317", "9_1412", "9_1413", "9_1414", "9_1541", "9_1542", "9_1812",
   "9_1702", "9_1703", "9_1704", "9_1813", "9_1838", "9_1868", "9_1870", "9_1878", "9_1879", "9_1880",
   "9_1967", "9_1980", "9_1982", "9_1585", "9_1596", "9_1598", "9_1603", "9_1604", "9_1606", "9_1607", "9_1615", "9_1663", "9_1677", "9_1679", "9_1681", "9_1693",
 ]);
@@ -66,6 +67,11 @@ const newProjectIds = new Set(["9_351", "9_1315", "9_1412", "9_1702", "9_1878"])
 const historyIds = new Set(["9_352", "9_1316", "9_1413", "9_1703", "9_1879"]);
 const presetMenuIds = new Set(["9_353", "9_1317", "9_1414", "9_1704", "9_1880"]);
 
+
+function formatSigned(value: number) {
+  const rounded = Math.round(value);
+  return rounded > 0 ? `+${rounded}` : String(rounded);
+}
 
 function setNodeText(root: HTMLElement | null, id: string, value: string) {
   const node = root?.querySelector<HTMLElement>(`[id="${id}"]`);
@@ -100,6 +106,7 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
   const [offsetX, setOffsetX] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [comparePosition, setComparePosition] = useState(52);
+  const [parameterPanelOpen, setParameterPanelOpen] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -161,15 +168,20 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
     const root = stageRef.current;
     if (!root) return;
     if (screen === "upload") {
-      setNodeText(root, "9_386", studio.prompt);
-      setNodeText(root, "9_387", `${studio.prompt.length} / 500`);
-      if (isMobile) setNodeText(root, "9_1594", studio.prompt);
+      setNodeText(root, "9_371", studio.target ? "已载入照片" : "拖入一张照片开始");
+      setNodeText(root, "9_372", studio.target ? studio.target.name : "JPG / PNG / WebP · 最长边自动压缩至 1600px");
+      setNodeText(root, "9_428", studio.target ? "生成 3 个候选" : "请先上传一张照片");
+      if (isMobile) {
+        setNodeText(root, "9_1590", studio.target ? "已载入照片" : "上传一张照片");
+        setNodeText(root, "9_1591", studio.target ? studio.target.name : "JPG / PNG / WebP");
+      }
     }
     if (screen === "processing") {
+      setNodeText(root, "9_428", studio.target ? "生成 3 个候选" : "请先上传一张照片");
       setNodeText(root, "9_1350", studio.prompt);
       setNodeText(root, "9_1351", `${studio.prompt.length} / 500`);
     }
-  }, [isMobile, screen, studio.prompt]);
+  }, [isMobile, screen, studio.prompt, studio.target]);
 
   useEffect(() => {
     const root = stageRef.current;
@@ -221,6 +233,10 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
     setNodeText(root, "9_1532", candidate.evaluation.deltaE === null ? "—" : candidate.evaluation.deltaE.toFixed(1));
     setNodeText(root, "9_1535", candidate.evaluation.skinShift.toFixed(1));
     setNodeText(root, "9_1538", `${(candidate.evaluation.structureScore * 100).toFixed(1)}%`);
+    setNodeText(root, "9_1546", formatSigned(candidate.params.exposure));
+    setNodeText(root, "9_1552", formatSigned(candidate.params.contrast));
+    setNodeText(root, "9_1558", formatSigned(candidate.params.temperature));
+    setNodeText(root, "9_1564", formatSigned(candidate.params.grain));
 
     candidates.forEach((item, index) => {
       const baseIds = [
@@ -268,42 +284,67 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
     setNodeImage(root, "9_1712", candidate.imageUrl, "linear-gradient(180deg, rgba(26,26,26,0.05), rgba(26,26,26,0.3))");
     const exportImage = root.querySelector<HTMLElement>('[id="9_1712"]');
     if (exportImage) exportImage.style.backgroundSize = "cover, contain";
-    setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`);
+setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`);
     setNodeText(root, "9_1751", studio.prompt);
-  }, [screen, studio.activeCandidate, studio.prompt]);
+    setNodeText(root, "9_1752", `${studio.prompt.length} / 500`);
+    setNodeText(root, "9_1797", `${candidate.id} / ${candidate.label}`);
+    setNodeText(root, "9_1799", candidate.evaluation.pass ? "PASS" : "DEGRADED");
+    setNodeText(root, "9_1803", candidate.evaluation.deltaE === null ? "—" : candidate.evaluation.deltaE.toFixed(1));
+    setNodeText(root, "9_1806", candidate.evaluation.skinShift.toFixed(1));
+    setNodeText(root, "9_1809", `${(candidate.evaluation.structureScore * 100).toFixed(1)}%`);
+    studio.candidates.forEach((item, index) => {
+      const ids = [
+        ["9_1844", "9_1845", "9_1846"],
+        ["9_1850", "9_1851", "9_1852"],
+        ["9_1856", "9_1857", "9_1858"],
+      ][index];
+      if (!ids) return;
+      const delta = item.evaluation.deltaE === null ? "无参考" : `ΔE ${item.evaluation.deltaE.toFixed(1)}`;
+      setNodeText(root, ids[0], `${item.id} / ${item.label}`);
+      setNodeText(root, ids[1], item.description);
+      setNodeText(root, ids[2], `${delta} · 结构 ${(item.evaluation.structureScore * 100).toFixed(1)}%`);
+    });
+    setNodeText(root, "9_1865", `xintu-color-grade.png · ${candidate.pixels.width} × ${candidate.pixels.height}`);
+  }, [screen, studio.activeCandidate, studio.candidates, studio.prompt]);
 
   const startAnalysis = useCallback(async () => {
+    if (!studio.target) {
+      showNotice("请先上传一张照片。");
+      return;
+    }
+    if (!studio.prompt.trim()) {
+      showNotice("请先描述你想要的调色效果。");
+      return;
+    }
     const token = ++navigationTokenRef.current;
     setScreen("processing");
     const [success] = await Promise.all([studio.analyze(), wait(1100)]);
     if (navigationTokenRef.current === token) setScreen(success ? "results" : "error");
-  }, [studio]);
+  }, [showNotice, studio]);
 
   const startWithFile = useCallback(async (file: File) => {
     const token = ++navigationTokenRef.current;
-    setScreen("processing");
-    const [loaded] = await Promise.all([studio.loadTarget(file), wait(400)]);
+    const loaded = await studio.loadTarget(file);
     if (navigationTokenRef.current !== token) return;
     if (!loaded) {
       setScreen("error");
       return;
     }
-    const [success] = await Promise.all([studio.analyze(loaded), wait(900)]);
-    if (navigationTokenRef.current === token) setScreen(success ? "results" : "error");
-  }, [studio]);
+    setScreen("upload");
+    showNotice("照片已上传。现在可以描述想要的效果，再点击生成。");
+  }, [showNotice, studio]);
 
   const startWithDemo = useCallback(async () => {
     const token = ++navigationTokenRef.current;
-    setScreen("processing");
-    const [loaded] = await Promise.all([studio.loadDemo(demoImages[activePreset]), wait(400)]);
+    const loaded = await studio.loadDemo(demoImages[activePreset]);
     if (navigationTokenRef.current !== token) return;
     if (!loaded) {
       setScreen("error");
       return;
     }
-    const [success] = await Promise.all([studio.analyze(loaded), wait(900)]);
-    if (navigationTokenRef.current === token) setScreen(success ? "results" : "error");
-  }, [activePreset, studio]);
+    setScreen("upload");
+    showNotice("演示照片已载入。你可以修改描述后生成候选。");
+  }, [activePreset, showNotice, studio]);
 
   const handleExport = useCallback(() => {
     if (!studio.activeCandidate) return;
@@ -367,7 +408,11 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
     if (screen === "upload") {
       if (quickPromptActions[id]) return studio.setPrompt(quickPromptActions[id]);
       if (strengthActions[id]) return studio.setStrength(strengthActions[id]);
-      if (id === "9_374" || id === "9_428") return fileInputRef.current?.click();
+      if (id === "9_374") return fileInputRef.current?.click();
+      if (id === "9_428") {
+        if (studio.target) return void startAnalysis();
+        return fileInputRef.current?.click();
+      }
       if (id === "9_406") return referenceInputRef.current?.click();
       if (id === "9_376") return void startWithDemo();
       return;
@@ -484,6 +529,19 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
         </div>
       ) : null}
       {notice ? <div className="xintu-notice" role="status">{notice}</div> : null}
+      {screen === "results" && studio.activeCandidate ? (
+        <button
+          type="button"
+          className="xintu-tune-trigger"
+          onClick={() => setParameterPanelOpen(true)}
+          aria-expanded={parameterPanelOpen}
+          aria-controls="xintu-parameter-panel"
+        >
+          <SlidersHorizontal size={16} />
+          <span>参数微调</span>
+          <small>13</small>
+        </button>
+      ) : null}
       {isMobile && screen === "upload" ? (
         <button type="button" className="xintu-mobile-demo" onClick={() => void startWithDemo()}>
           没有照片？载入演示
@@ -546,6 +604,25 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
             ) : null}
           </div>
         </div>
+      {screen === "results" && studio.activeCandidate ? (
+        <ManualParameterPanel
+          open={parameterPanelOpen}
+          params={studio.activeCandidate.params}
+          aiParams={studio.activeCandidate.aiParams}
+          evaluation={studio.activeCandidate.evaluation}
+          iterations={studio.iterations}
+          elapsedMs={studio.elapsedMs}
+          manualRefinements={studio.manualRefinements}
+          conversation={studio.conversation}
+          busy={studio.isBusy}
+          onChange={studio.updateParam}
+          onReset={studio.resetActiveParams}
+          onClose={() => setParameterPanelOpen(false)}
+          onAccept={() => { setParameterPanelOpen(false); showNotice("当前参数已应用，可继续导出 PNG。"); }}
+          onExport={() => { setParameterPanelOpen(false); handleExport(); }}
+          onFeedback={studio.refineFromFeedback}
+        />
+      ) : null}
       </div>
     </div>
   );

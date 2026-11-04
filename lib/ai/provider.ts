@@ -21,6 +21,7 @@ export type RefineInput = {
   params: ColorParams;
   findings: string[];
   iteration: number;
+  mode?: "auto" | "manual";
 };
 
 export type AnalyzeOutput = {
