@@ -2,7 +2,7 @@
 
 ### 基于参考图的 AI 调色 Agent，不生成任何新像素。
 
-[English](README.md) · [简体中文](README.zh-CN.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [招聘作品集](https://xintu-demo.vercel.app/portfolio)
 
 [![CI](https://github.com/AirZhou1zz/XINTU/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AirZhou1zz/XINTU/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3d6b57.svg)](LICENSE)
@@ -14,6 +14,8 @@
 **XINTU 是一个有边界的图像 Agent 实验：AI 理解画面与参考意图，规划少量调色工具并输出结构化参数；最终由浏览器中的 Canvas 2D 对原始像素进行确定性渲染。** 它不生成新场景、不替换天空、不改变人物身份。
 
 <p>
+  <a href="https://xintu-demo.vercel.app/portfolio"><strong>AI 产品经理作品集</strong></a>
+  ·
   <a href="https://xintu-demo.vercel.app"><strong>免费体验公开 Demo</strong></a>
   ·
   <a href="docs/live-qwen-export.png">查看真实千问效果</a>
@@ -22,6 +24,10 @@
 </p>
 
 > 公开 Demo 使用本地 Mock Planner，不调用付费模型、不产生 API 费用。真实 Qwen 3.8 的效果截图见下方。
+
+## 招聘作品集
+
+移动端优先的项目案例页：[xintu-demo.vercel.app/portfolio](https://xintu-demo.vercel.app/portfolio)。适合直接放进简历的二维码卡片：[docs/resume-qr-card.png](docs/resume-qr-card.png)。
 
 ## 为什么做 XINTU？
 
