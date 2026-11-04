@@ -1,0 +1,48 @@
+name: Feature request
+description: Propose a focused improvement to the product or developer workflow.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        XINTU favors small, explainable features that preserve the bounded-agent design.
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: What problem should this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Explain the smallest useful version of the idea.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Color grading quality
+        - Agent planning and evaluation
+        - UI and interaction
+        - Performance and cost
+        - Documentation and developer experience
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: This request fits the non-generative product boundary.
+          required: true
+        - label: I searched existing issues before opening this one.
+          required: true

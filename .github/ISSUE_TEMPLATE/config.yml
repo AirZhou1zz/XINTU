@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Try the public demo
+    url: https://xintu-demo.vercel.app
+    about: Explore the deterministic mock workflow before opening a report.
+  - name: Read the contribution guide
+    url: https://github.com/AirZhou1zz/XINTU/blob/main/CONTRIBUTING.md
+    about: Review setup, testing, and pull request expectations.

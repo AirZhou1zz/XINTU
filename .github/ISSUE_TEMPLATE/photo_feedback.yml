@@ -1,0 +1,50 @@
+name: Photo feedback
+description: Share a real-world scene that XINTU handles well or poorly.
+title: "[Photo feedback]: "
+labels: ["feedback", "color quality"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please use images you own or have permission to share. Do not upload private portraits, identity documents, or sensitive locations.
+  - type: dropdown
+    id: scene
+    attributes:
+      label: Scene type
+      options:
+        - Portrait
+        - Travel or landscape
+        - Sky or backlight
+        - Night scene
+        - Product or still life
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: intent
+    attributes:
+      label: What look did you request?
+      placeholder: Warm film look, muted greens, soft skin tones...
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened?
+      description: Explain what looked correct, what failed, and whether identity or structure stayed intact.
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Shareable examples
+      description: Drag in images only if you have permission to share them.
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Consent
+      options:
+        - label: I own these images or have permission to share them.
+          required: true
+        - label: The images do not contain private or sensitive information.
+          required: true

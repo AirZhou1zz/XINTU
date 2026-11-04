@@ -1,99 +1,124 @@
-# 心图 / Silver Halide Color Lab
+# XINTU
 
-一个有界的 Agentic Color Grading Workflow：AI 负责理解画面、动态规划调色步骤、生成可解释参数，Canvas 在本地完成确定性渲染。
+### Reference-based AI color grading that never generates pixels.
 
-**不生成新像素，不改变画面内容，不无限自主循环。**
+[English](README.md) · [简体中文](README.zh-CN.md)
 
-![心图预览](docs/preview.png)
+[![CI](https://github.com/AirZhou1zz/XINTU/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AirZhou1zz/XINTU/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-3d6b57.svg)](LICENSE)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-8b78aa.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-527f72.svg)](https://www.typescriptlang.org/)
 
-## 在线体验
+![XINTU workflow demo](docs/hero-demo.gif)
 
-- **公开 Mock Demo**：[https://xintu-demo.vercel.app](https://xintu-demo.vercel.app)
-- 公开 Demo 固定使用本地 Mock Planner，不配置大模型 Key，不消耗任何模型额度。
-- 可以完整体验：上传照片、选择调色方向、生成 3 个候选、拖动前后对比、查看评估指标、导出 PNG。
-- 真实 Qwen 3.8 视觉分析版本采用私有部署，避免公开调用消耗 API 额度。
+**XINTU is a bounded image-agent experiment for reference-based color grading.** The model interprets the image and the requested look, plans a small set of grading operations, and emits structured parameters. The original pixels are rendered locally with Canvas 2D. It does not generate a new scene, replace the sky, or alter a person's identity.
 
-![公开 Demo 结果](docs/public-demo.png)
+<p>
+  <a href="https://xintu-demo.vercel.app"><strong>Try the free demo</strong></a>
+  ·
+  <a href="docs/live-qwen-export.png">See real Qwen output</a>
+  ·
+  <a href="#how-it-works">Read the workflow</a>
+</p>
 
-真实 Qwen 3.8 视觉分析与 PNG 导出效果（私有部署）：
+> The public demo is deliberately deterministic and uses a local mock planner. It costs nothing to try and makes no model API calls. Real Qwen 3.8 output is shown in the screenshots below.
 
-![真实 Qwen 3.8 调色与导出](docs/live-qwen-export.png)
+## Why XINTU?
 
-### 别人如何了解这个项目
+Most AI photo editors change the image by generating new content. XINTU explores a narrower and more controllable problem:
 
-1. 打开公开 Mock Demo，直接体验完整产品交互。
-2. 查看 README 中的界面截图、三候选与前后对比效果。
-3. 阅读下方架构与 Agent 边界，了解它为什么不是普通滤镜。
-4. 如需真实模型版本，克隆源码后自行部署，并配置自己的千问 API Key。
+- Match a reference look without regenerating the photograph.
+- Keep faces, objects, geometry, and scene content intact.
+- Turn model output into explainable, bounded grading parameters.
+- Evaluate the result and retry at most twice.
+- Render the same input and parameters to the same output in the browser.
+- Run a complete product demo without requiring an API key.
 
-## 产品定位
+This makes the project useful as both a small photo-editing product and a reference implementation for **bounded visual agents**.
 
-心图面向人像与旅行照片的轻度创作者。用户上传一张照片，用自然语言描述想要的氛围，系统会：
+## What it does
 
-1. 分析画面与用户意图
-2. 动态选择调色工具和顺序
-3. 生成结构化调色参数
-4. 在浏览器本地确定性渲染候选
-5. 评估肤色、天空、结构与参考相似度
-6. 未通过时最多修正 2 轮
-7. 输出 3 个候选，支持手动微调与 PNG 导出
+1. Upload a target photo and an optional reference image.
+2. Describe the desired mood in natural language.
+3. Let the bounded agent choose grading tools and order them.
+4. Generate structured color parameters.
+5. Render three candidates locally with Canvas 2D.
+6. Evaluate skin, sky, structure, clipping, and color distance.
+7. Refine up to two rounds when the result misses its target.
+8. Compare, fine-tune, and export a PNG.
 
-## 视觉方向
+![XINTU demo](docs/public-demo.png)
 
-Silver Halide Color Lab：
+## Demo modes
 
-- 暖银灯箱与电影后期工作台
-- 骨白纸面、雾蓝灰与暖银灰
-- 钴蓝、朱红、藏红花黄与翡翠绿作为高级撞色
-- 不使用大面积黑色背景
-- 渐变只作为状态、指标与品牌光谱的签名元素
+| Mode | Model | API cost | Purpose |
+| --- | --- | --- | --- |
+| Public demo | Local mock planner | Zero | Anyone can explore the full interaction |
+| Local live mode | Qwen 3.8 Flash via DashScope | Your own key | Real image analysis and planning |
+| Deterministic render | Browser Canvas | Zero | Inspectable and repeatable output |
 
-## 功能
+The public demo intentionally does not expose the owner's API key or bill the owner's account.
 
-- 目标图片上传与自动降采样
-- 参考图上传
-- 自然语言调色描述
-- 弱 / 中 / 强三档强度
-- 动态调色规划
-- Mock Provider 与可选 Qwen 3.8 Flash Provider
-- Canvas 本地确定性调色
-- 前后拖动对比
-- 3 个候选方案
-- Agent Trace：PLAN → APPLY → EVALUATE → REFINE
-- 指标面板：ΔE Lab、肤色偏移、天空偏移、结构保持、剪切比例、修正轮次
-- 13 项手动参数微调
-- PNG 导出
-- 响应式桌面 / 移动端
-- 键盘焦点、减少动效与基础无障碍支持
+## How it works
 
-## 快速开始
+```mermaid
+flowchart LR
+  A[Target + reference] --> B[Vision analysis]
+  B --> C[Bounded planner]
+  C --> D[Structured grading plan]
+  D --> E[Local Canvas render]
+  E --> F[Evaluation]
+  F -->|pass| G[3 candidates]
+  F -->|miss · max 2| C
+  G --> H[Compare · tune · export]
+```
 
-要求 Node.js 20.9 或更高版本。
+The model never draws the final image. It only returns a validated plan. Rendering and export stay inside the browser.
+
+## Agent boundaries
+
+- Plans grading operations instead of generating pixels.
+- Selects no more than four tools.
+- Returns parameters validated by Zod and clamped to safe ranges.
+- Refines no more than two times.
+- Stops on timeout or provider failure.
+- Falls back to the deterministic mock provider when live analysis is unavailable.
+- Does not persist uploaded images.
+- Does not automatically publish or share results.
+
+## Evaluation signals
+
+The current prototype reports lightweight browser-side signals:
+
+- `ΔE Lab`: CIE76 approximation, not full ΔE2000.
+- Skin-tone shift: heuristic skin mask and average RGB offset.
+- Sky shift: blue-dominant region heuristic.
+- Structure retention: grayscale correlation between source and result.
+- Clipping ratio: sampled pixels near black or white.
+- Refinement count: bounded retries before the workflow stops.
+
+These are product-demo metrics, not a substitute for professional color science or human review.
+
+## Quick start
+
+Requirements: Node.js 20.9 or newer.
 
 ```bash
 npm install
 npm run dev
 ```
 
-打开 http://localhost:3000。
+Open [http://localhost:3000](http://localhost:3000). With no API key, XINTU runs in deterministic mock mode. Click **Load demo photo**, then generate the three candidates.
 
-没有 API Key 时，应用会自动使用 Mock Provider。可以直接点击「载入演示照片」，再点击「生成 3 个候选」。
+## Live model setup
 
-## 环境变量
-
-复制 `.env.example` 为 `.env.local`：
+Copy the example environment file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-默认 Mock 模式：
-
-```env
-AI_PROVIDER=mock
-```
-
-启用 Qwen 3.8 Flash（阿里云 DashScope 直连）：
+Configure Qwen 3.8 Flash through the DashScope OpenAI-compatible endpoint:
 
 ```env
 AI_PROVIDER=openai
@@ -104,116 +129,31 @@ AI_TIMEOUT_MS=45000
 MAX_IMAGE_MB=15
 ```
 
-`OPENAI_MODEL` 必须与阿里云百炼控制台中开通的模型 ID 保持一致。Provider 必须支持视觉输入，并能返回严格 JSON。凭据只在服务端读取，不会进入客户端代码。
+The provider must support image input and return valid JSON. Credentials are read only on the server and are never included in client code.
 
-Vercel AI Gateway OIDC 路径仍保留为可选方案；只有在 `OPENAI_BASE_URL` 指向 `https://ai-gateway.vercel.sh/v1` 时才会使用 `VERCEL_OIDC_TOKEN`，不会误用于 DashScope。
-
-## 脚本
-
-```bash
-npm run dev        # 启动开发服务器
-npm run build      # 生产构建
-npm run start      # 启动生产服务器
-npm run lint       # ESLint
-npm run typecheck  # TypeScript 类型检查
-npm test           # Vitest 单元测试
-```
-
-## 架构
+## Architecture
 
 ```text
 app/
-  page.tsx
   api/agent/analyze/route.ts
   api/agent/refine/route.ts
 
 components/studio/
   studio-shell.tsx
   before-after.tsx
-  prompt-panel.tsx
-  upload-dropzone.tsx
-  agent-trace.tsx
   candidate-rail.tsx
   evaluation-panel.tsx
   parameter-panel.tsx
-  plan-card.tsx
   use-studio.ts
 
-lib/color/
-  schema.ts
-  engine.ts
-  metrics.ts
-  types.ts
-
-lib/agent/
-  candidates.ts
-  schema.ts
-  types.ts
-
-lib/ai/
-  provider.ts
-  mock-provider.ts
-  openai-compatible.ts
-  prompt.ts
-
-lib/image/
-  browser.ts
+lib/
+  agent/      planner and candidate generation
+  ai/         provider adapters and prompt contract
+  color/      schema, Canvas engine and metrics
+  image/      browser image loading and downscaling
 ```
 
-### Agent 边界
-
-- 只做调色规划与参数修正
-- 不生成像素
-- 不改变画面内容
-- 不自动发布
-- 不持久化用户图片
-- 最多选择 4 个工具
-- 最多修正 2 轮
-- 参数必须经过 Zod schema 校验与范围裁剪
-- 超过时间或成本限制时停止
-
-### 技术栈
-
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- Canvas 2D
-- Zod
-- Vitest
-- Lucide React
-
-## 指标说明
-
-当前版本使用轻量浏览器端指标：
-
-- `ΔE Lab`：CIE76 色差近似，不是完整 ΔE2000
-- 肤色偏移：基于肤色启发式蒙版的平均 RGB 偏移
-- 天空偏移：基于蓝色主导区域的启发式蒙版
-- 结构保持：原始图与结果图的灰度相关性
-- 剪切比例：接近纯黑或纯白通道的采样比例
-
-这些指标用于演示有界评估闭环，不替代专业色彩科学或人工审片。
-
-## 安全与隐私
-
-- 图片不会被持久化。
-- Mock 模式完全在浏览器中处理。
-- AI 模式下，图片会发送给配置的模型 Provider 进行分析。
-- 渲染与导出始终在浏览器本地完成。
-- 不在日志中记录图片、Prompt 或完整模型响应。
-- 请求体大小限制为 `MAX_IMAGE_MB`。
-- Provider 超时后自动回退到 Mock 模式，并在 UI 中显示当前 Provider 状态。
-
-## 已知限制
-
-- 当前不包含登录、支付、订单、云端历史或批量处理。
-- 当前不是微信小程序。
-- 真实照片的质量需要在人像、夜景、逆光、天空等场景中继续校准。
-- 实时 Provider 返回格式依赖所选模型，必须支持视觉输入与 JSON 输出。
-- 当前结构指标是相关性近似，不是完整 SSIM 实现。
-
-## 发布前检查
+## Quality checks
 
 ```bash
 npm ci
@@ -223,14 +163,43 @@ npm test
 npm run build
 ```
 
-## 设计文档
+The repository includes 21 unit tests across five test files and a GitHub Actions CI workflow.
 
-实现规格位于：
+## Security and privacy
 
-```text
-docs/superpowers/specs/2026-11-02-agentic-color-workflow-design.md
-```
+- Uploaded images are not persisted by XINTU.
+- Mock mode processes everything locally.
+- Live mode sends the image to the configured model provider for analysis.
+- Rendering and export always happen in the browser.
+- API keys and image payloads are never logged.
+- Request size is limited by `MAX_IMAGE_MB`.
+- Provider timeout triggers a visible fallback to local mock mode.
+- Never commit `.env.local`, provider keys, or deployment tokens.
+
+Please report vulnerabilities privately through GitHub Security Advisories. See [SECURITY.md](SECURITY.md).
+
+## Current limitations
+
+- No login, payments, cloud history, or batch processing yet.
+- Not a WeChat Mini Program.
+- The browser metrics are intentionally lightweight approximations.
+- Real-model output quality still needs calibration across portraits, backlight, night scenes, and skies.
+- Model compatibility depends on vision input and strict JSON support.
+
+## Roadmap
+
+- Cached real-model sample replays that require no API key.
+- More before/after scenes and documented failure cases.
+- Batch presets and reusable grading profiles.
+- Stronger color metrics and reproducible benchmark fixtures.
+- English and Chinese product documentation improvements.
+
+## Contributing
+
+Product feedback, real-world photo cases, and focused pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or PR.
+
+If XINTU is useful to your work, a star helps other builders discover the project.
 
 ## License
 
-MIT
+[MIT](LICENSE)
