@@ -3,7 +3,7 @@ import path from "node:path";
 import QRCode from "qrcode";
 import sharp from "sharp";
 
-const portfolioUrl = "https://airzhou1zz.github.io/XINTU/portfolio/";
+const portfolioUrl = "https://airzhou1zz.github.io/XINTU/";
 const outputDir = path.join(process.cwd(), "docs");
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -46,7 +46,7 @@ const cardSvg = `
   <text x="600" y="1064" text-anchor="middle" font-family="Georgia, serif" font-size="46" fill="#173B34">让 AI 修图回到“可控”</text>
   <text x="600" y="1108" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#4B6D61">参考图追色 · 非生成式编辑 · 有界 Agent · 本地确定性渲染</text>
   <text x="600" y="1172" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="#173B34">SCAN TO EXPLORE</text>
-  <text x="600" y="1204" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6B5A77">airzhou1zz.github.io/XINTU/portfolio/</text>
+  <text x="600" y="1204" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6B5A77">airzhou1zz.github.io/XINTU/</text>
 </svg>`;
 
 fs.writeFileSync(path.join(outputDir, "resume-qr.png"), png);
