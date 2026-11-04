@@ -1,0 +1,48 @@
+.spectrum-orb {
+  animation: lab-spectrum-orbit 18s linear infinite;
+}
+
+.candidate-card,
+.chip,
+.segmented-control button,
+.primary-button,
+.ghost-button,
+.privacy-menu summary {
+  transform: translateZ(0);
+}
+
+.candidate-card {
+  will-change: transform;
+}
+
+@keyframes lab-spectrum-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .candidate-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .spectrum-orb {
+    animation: none;
+  }
+
+  .candidate-card:hover {
+    transform: none;
+  }
+}

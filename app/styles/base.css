@@ -1,0 +1,151 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #5d7b86;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--lab-ink);
+  font-family: var(--lab-font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  background:
+    radial-gradient(circle at 70% 32%, rgba(230, 224, 221, 0.34), transparent 36%),
+    linear-gradient(
+      180deg,
+      #5d7b86 0%,
+      #6a7c82 8%,
+      #737d80 15%,
+      #868585 22%,
+      #9a908c 28%,
+      #a1958e 35%,
+      #a6938c 41%,
+      #c9bbb5 47%,
+      #e6e0dd 53%,
+      #ddd6d3 59%,
+      #c3b4af 66%,
+      #c5b2ac 72%,
+      #bbaba5 78%,
+      #b5a39e 86%,
+      #85685e 94%,
+      #664135 100%
+    );
+  background-attachment: fixed;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  z-index: 30;
+  opacity: 0.11;
+  mix-blend-mode: multiply;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(24, 53, 59, 0.07) 0,
+    rgba(24, 53, 59, 0.07) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+body::after {
+  z-index: 0;
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0.14), transparent 34%, rgba(102, 65, 53, 0.08)),
+    radial-gradient(ellipse at 50% 42%, transparent 38%, rgba(102, 65, 53, 0.16) 100%);
+}
+
+button,
+input,
+textarea {
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.44;
+}
+
+button,
+summary,
+input,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--lab-focus);
+}
+
+::selection {
+  color: var(--lab-paper-bright);
+  background: var(--lab-cobalt);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(24, 53, 59, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(24, 53, 59, 0.28);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.eyebrow,
+.mono-label {
+  margin: 0;
+  color: var(--lab-muted);
+  font-family: var(--lab-font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.spin {
+  animation: lab-spin 0.9s linear infinite;
+}
+
+@keyframes lab-spin {
+  to { transform: rotate(360deg); }
+}

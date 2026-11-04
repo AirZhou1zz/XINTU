@@ -1,0 +1,49 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8e2e2"/>
+      <stop offset=".32" stop-color="#aebfc1"/>
+      <stop offset=".62" stop-color="#d9a77f"/>
+      <stop offset="1" stop-color="#f2c466"/>
+    </linearGradient>
+    <linearGradient id="mountainBack" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#6f9296"/>
+      <stop offset="1" stop-color="#42656a"/>
+    </linearGradient>
+    <linearGradient id="mountainFront" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#31545b"/>
+      <stop offset="1" stop-color="#70908e"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#a3c0bd"/>
+      <stop offset=".5" stop-color="#eece98"/>
+      <stop offset="1" stop-color="#d37f61"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop stop-color="#fff4ce"/>
+      <stop offset=".48" stop-color="#f5c45f"/>
+      <stop offset="1" stop-color="#f05a42" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 .16"/></feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#sky)"/>
+  <circle cx="1090" cy="380" r="300" fill="url(#sun)" filter="url(#soft)"/>
+  <circle cx="1090" cy="380" r="96" fill="#ffe2a0" opacity=".92"/>
+  <path d="M0 660 265 435 530 610 810 385 1120 610 1335 455 1600 665V1200H0Z" fill="url(#mountainBack)" opacity=".82"/>
+  <path d="M0 770 260 560 490 735 760 505 1025 745 1260 575 1600 760V1200H0Z" fill="url(#mountainFront)"/>
+  <path d="M0 840C240 792 402 826 592 850c212 27 329-26 521-8 185 18 322 70 487 26v332H0Z" fill="url(#water)" opacity=".88"/>
+  <path d="M0 1006c220-42 370-15 573 7 217 24 373-35 569-17 171 16 298 57 458 32v172H0Z" fill="#ddc7a4" opacity=".7"/>
+  <g fill="#f8e6c2" opacity=".75">
+    <circle cx="178" cy="176" r="3"/><circle cx="240" cy="228" r="2"/><circle cx="352" cy="142" r="2"/>
+    <circle cx="1290" cy="218" r="3"/><circle cx="1382" cy="164" r="2"/><circle cx="1220" cy="124" r="2"/>
+  </g>
+  <rect width="1600" height="1200" filter="url(#grain)" opacity=".18"/>
+</svg>

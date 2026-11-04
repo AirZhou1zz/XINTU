@@ -1,0 +1,44 @@
+:root {
+  --lab-ground: #a6938c;
+  --lab-ground-deep: #85685e;
+  --lab-paper: #f5efe8;
+  --lab-paper-bright: #fbf8f4;
+  --lab-mist: #b8c8c9;
+  --lab-ink: #18353b;
+  --lab-ink-soft: #4d6264;
+  --lab-muted: #5c6e6f;
+  --lab-line: rgba(24, 53, 59, 0.16);
+  --lab-line-strong: rgba(24, 53, 59, 0.32);
+  --lab-cobalt: #244bcf;
+  --lab-cobalt-soft: rgba(36, 75, 207, 0.1);
+  --lab-vermilion: #b63a28;
+  --lab-vermilion-soft: rgba(199, 68, 48, 0.1);
+  --lab-vermilion-vivid: #dd583c;
+  --lab-saffron: #8a5a00;
+  --lab-saffron-soft: rgba(185, 120, 8, 0.11);
+  --lab-saffron-vivid: #d49a26;
+  --lab-emerald: #147967;
+  --lab-emerald-soft: rgba(20, 121, 103, 0.11);
+  --lab-shadow: 0 28px 80px rgba(54, 53, 57, 0.18);
+  --lab-shadow-tight: 0 12px 30px rgba(54, 53, 57, 0.12);
+  --lab-glass: rgba(226, 219, 217, 0.52);
+  --lab-glass-strong: rgba(230, 224, 221, 0.72);
+  --lab-glass-border: rgba(255, 255, 255, 0.5);
+  --lab-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --lab-rose: #a6938c;
+  --lab-ice: #5d7b86;
+  --lab-sage: #c9bbb5;
+  --lab-radius-sheet: 26px;
+  --lab-radius-control: 12px;
+  --lab-font-display: "STXingkai", "KaiTi", "STKaiti", "FZKai-Z03", serif;
+  --lab-font-body: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --lab-font-mono: "Cascadia Mono", "SFMono-Regular", "IBM Plex Mono", Consolas, monospace;
+  --lab-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --lab-focus: 0 0 0 2px var(--lab-paper-bright), 0 0 0 5px var(--lab-cobalt);
+}
+
+@theme inline {
+  --font-display: var(--lab-font-display);
+  --font-body: var(--lab-font-body);
+  --font-mono: var(--lab-font-mono);
+}

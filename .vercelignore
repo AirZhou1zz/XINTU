@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+node_modules
+.next
+out
+coverage
+.vercel
+.audit
+.cache
+.pixso-generated
+*.log
+*.tsbuildinfo
+.DS_Store
