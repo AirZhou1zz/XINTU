@@ -213,7 +213,7 @@ lib/image/
 - 实时 Provider 返回格式依赖所选模型，必须支持视觉输入与 JSON 输出。
 - 当前结构指标是相关性近似，不是完整 SSIM 实现。
 
-## GitHub 发布检查
+## 发布前检查
 
 ```bash
 npm ci
@@ -222,8 +222,6 @@ npm run typecheck
 npm test
 npm run build
 ```
-
-CI 配置位于 `.github/workflows/ci.yml`。
 
 ## 设计文档
 
