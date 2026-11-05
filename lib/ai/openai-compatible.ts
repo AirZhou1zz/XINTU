@@ -109,7 +109,7 @@ export class OpenAICompatibleProvider implements ColorProvider {
 
   async analyze(input: AnalyzeInput): Promise<AnalyzeOutput> {
     const userContent: ChatMessage["content"] = [
-      { type: "text", text: buildAnalyzePrompt(input.prompt, input.strength, input.sceneHints) },
+      { type: "text", text: buildAnalyzePrompt(input.prompt, input.strength) },
       { type: "image_url", image_url: { url: input.imageDataUrl } },
     ];
     if (input.referenceDataUrl) {

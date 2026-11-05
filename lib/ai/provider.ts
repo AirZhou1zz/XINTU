@@ -62,7 +62,8 @@ export async function analyzeWithFallback(input: AnalyzeInput): Promise<AnalyzeO
     return applySceneGuard(await new MockProvider().analyze(input), input);
   }
   try {
-    return applySceneGuard(await getProvider().analyze(input), input);
+    const result = await getProvider().analyze(input);
+    return result.provider === "mock" ? applySceneGuard(result, input) : result;
   } catch (error) {
     console.warn("Live provider failed, falling back to mock:", error instanceof Error ? error.message : "unknown");
     return applySceneGuard(await new MockProvider().analyze(input), input);

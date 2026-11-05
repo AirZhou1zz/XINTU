@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { buildCandidateVariants, scaleParamsForStrength } from "@/lib/agent/candidates";
 import { MockProvider } from "@/lib/ai/mock-provider";
 import { OpenAICompatibleProvider } from "@/lib/ai/openai-compatible";
-import { getProvider } from "@/lib/ai/provider";
+import { analyzeWithFallback, getProvider } from "@/lib/ai/provider";
 import { reconcileScenePlan } from "@/lib/agent/scene";
 import { colorParamsSchema } from "@/lib/color/schema";
 
@@ -387,6 +387,62 @@ describe("live provider configuration", () => {
       expect(url).toBe("https://ai-gateway.vercel.sh/v1/chat/completions");
       expect(new Headers(init.headers).get("Authorization")).toBe("Bearer test-gateway-key");
       expect(JSON.parse(String(init.body))).toMatchObject({ model: "alibaba/qwen3.8-flash" });
+    } finally {
+      vi.unstubAllGlobals();
+      restoreEnvironment(snapshot);
+    }
+  });
+  it("trusts the live Qwen scene decision instead of overriding it with skin heuristics", async () => {
+    const snapshot = snapshotEnvironment();
+    const livePlan = {
+      intent: "自然通透",
+      sceneSummary: "城市街景，建筑、石板路和车辆为主，人物较小。",
+      sceneCategory: "city",
+      sceneConfidence: 0.94,
+      directions: [
+        { id: "A", label: "自然通透", description: "保持城市真实质感", style: "natural" },
+        { id: "B", label: "建筑层次", description: "强化街道纵深", style: "airy" },
+        { id: "C", label: "电影街景", description: "建立冷暖电影关系", style: "cinematic" },
+      ],
+      tools: ["global_grade"],
+      constraints: ["保留结构"],
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ choices: [{ message: { content: JSON.stringify({ plan: livePlan, params: testParams }) } }] }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      process.env.AI_PROVIDER = "openai";
+      process.env.OPENAI_API_KEY = "test-dashscope-key";
+      process.env.OPENAI_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+      process.env.OPENAI_MODEL = "qwen3.8-flash";
+      delete process.env.AI_GATEWAY_API_KEY;
+      delete process.env.VERCEL_OIDC_TOKEN;
+
+      const output = await analyzeWithFallback({
+        prompt: "自然、通透，保留真实质感与画面层次",
+        strength: "medium",
+        imageDataUrl: "data:image/jpeg;base64,AAAA",
+        sceneHints: {
+          averageLuma: 0.36,
+          clippingRatio: 0.07,
+          skinRatio: 0.18,
+          centralSkinRatio: 0.1,
+          skyRatio: 0.22,
+          natureRatio: 0,
+          waterRatio: 0.17,
+          aspectRatio: 0.8,
+          temperatureBias: 0,
+        },
+      });
+
+      expect(output.provider).toBe("openai-compatible");
+      expect(output.plan.sceneCategory).toBe("city");
+      expect(output.plan.sceneSummary).toContain("城市街景");
     } finally {
       vi.unstubAllGlobals();
       restoreEnvironment(snapshot);
