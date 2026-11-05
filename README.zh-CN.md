@@ -169,7 +169,7 @@ npm test
 npm run build
 ```
 
-仓库包含 5 个测试文件、25 项单元测试，以及 GitHub Actions CI 工作流。
+仓库包含 5 个测试文件、27 项单元测试，以及 GitHub Actions CI 工作流。
 
 ## 安全与隐私
 

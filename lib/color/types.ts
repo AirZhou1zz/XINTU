@@ -71,6 +71,7 @@ export type SceneHints = {
   natureRatio: number;
   waterRatio: number;
   aspectRatio: number;
+  temperatureBias: number;
 };
 
 export type CandidateDirection = {

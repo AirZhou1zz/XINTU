@@ -169,7 +169,7 @@ npm test
 npm run build
 ```
 
-The repository includes 25 unit tests across five test files and a GitHub Actions CI workflow.
+The repository includes 27 unit tests across five test files and a GitHub Actions CI workflow.
 
 ## Security and privacy
 

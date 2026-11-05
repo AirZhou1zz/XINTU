@@ -49,6 +49,7 @@ describe("mock provider and candidates", () => {
         natureRatio: 0.02,
         waterRatio: 0,
         aspectRatio: 0.72,
+        temperatureBias: 0.02,
       },
     });
     expect(output.provider).toBe("mock");
@@ -97,6 +98,7 @@ describe("mock provider and candidates", () => {
         natureRatio: 0.03,
         waterRatio: 0,
         aspectRatio: 0.75,
+        temperatureBias: 0.02,
       },
     });
     expect(output.plan.sceneCategory).toBe("portrait");
@@ -105,6 +107,26 @@ describe("mock provider and candidates", () => {
     expect(output.plan.directions[0].label).toContain("肤质");
   });
 
+  it("does not reuse portrait directions for a coastal scene", async () => {
+    const provider = new MockProvider();
+    const output = await provider.analyze({
+      prompt: "帮我修得高级一点",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: {
+        averageLuma: 0.64,
+        clippingRatio: 0.02,
+        skinRatio: 0.01,
+        skyRatio: 0.22,
+        natureRatio: 0.08,
+        waterRatio: 0.34,
+        aspectRatio: 1.6,
+        temperatureBias: -0.03,
+      },
+    });
+    expect(output.plan.sceneCategory).toBe("ocean");
+    expect(output.plan.directions.map((item) => item.label)).toContain("清透水色");
+  });
   it("returns a bounded local visual review", async () => {
     const provider = new MockProvider();
     const review = await provider.review({
@@ -125,6 +147,14 @@ describe("mock provider and candidates", () => {
     expect(review.score).toBeGreaterThanOrEqual(0);
     expect(review.score).toBeLessThanOrEqual(100);
     expect(review.verdict).toBe("pass");
+  });
+  it("keeps the three candidates visibly distinct", () => {
+    const variants = buildCandidateVariants(testParams);
+    expect(new Set(variants.map((item) => JSON.stringify(item.params))).size).toBe(3);
+    const temperatures = variants.map((item) => item.params.temperature);
+    const saturation = variants.map((item) => item.params.saturation);
+    expect(Math.max(...temperatures) - Math.min(...temperatures)).toBeGreaterThanOrEqual(10);
+    expect(Math.max(...saturation) - Math.min(...saturation)).toBeGreaterThanOrEqual(10);
   });
   it("builds three bounded variants", () => {
     const base = testParams;

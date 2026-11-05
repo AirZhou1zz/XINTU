@@ -21,6 +21,7 @@ export const analyzeRequestSchema = z
         natureRatio: z.number().min(0).max(1).optional().default(0),
         waterRatio: z.number().min(0).max(1).optional().default(0),
         aspectRatio: z.number().min(0.2).max(5).optional().default(1),
+        temperatureBias: z.number().min(-1).max(1).optional().default(0),
       })
       .optional(),
   })

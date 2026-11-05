@@ -99,6 +99,109 @@ export function detectScene(hints: SceneHints | undefined, prompt: string) {
   return { category: "other" as const, confidence: 0.42 };
 }
 
-export function directionsForScene(category: SceneCategory): CandidateDirection[] {
+export function directionsForScene(
+  category: SceneCategory,
+  hints?: SceneHints,
+  prompt = "",
+): CandidateDirection[] {
+  if (!hints) return directions[category];
+
+  const dark = hints.averageLuma < 0.38;
+  const bright = hints.averageLuma > 0.66;
+  const clipped = hints.clippingRatio > 0.045;
+  const aquatic = hints.waterRatio > 0.16 && hints.skyRatio > 0.05;
+  const lush = hints.natureRatio > 0.2;
+  const warmRequest = promptIncludes(prompt, ["暖", "日落", "金黄", "夕阳"]);
+  const coolRequest = promptIncludes(prompt, ["冷", "蓝", "青", "通透", "夜"]);
+
+  if (category === "portrait") {
+    if (dark) {
+      return [
+        { id: "A", label: "自然提亮", description: "抬升中间调与阴影，优先保持肤色自然。", style: "natural" },
+        { id: "B", label: "暖调补光", description: "补充暖色光感，降低暗部灰闷和肤色偏冷。", style: "warm_film" },
+        { id: "C", label: "夜景柔光", description: "压住高光、轻抬阴影，保留夜景氛围。", style: "cinematic" },
+      ];
+    }
+    if (clipped) {
+      return [
+        { id: "A", label: "高光收敛", description: "降低高光和对比，找回面部与背景细节。", style: "soft" },
+        { id: "B", label: "自然肤色", description: "控制肤色饱和与暖度，做稳健的人像校正。", style: "natural" },
+        { id: "C", label: "柔光电影", description: "柔化高光并压低整体对比，保留质感。", style: "cinematic" },
+      ];
+    }
+    if (warmRequest || hints.temperatureBias > 0.08) {
+      return [
+        { id: "A", label: "暖调写真", description: "强化暖光与肤色层次，保持自然不过黄。", style: "warm_film" },
+        { id: "B", label: "自然肤色", description: "优先保护肤色和面部结构。", style: "natural" },
+        { id: "C", label: "清透柔光", description: "提亮中间调，柔化高光并保留皮肤纹理。", style: "soft" },
+      ];
+    }
+    if (coolRequest || hints.temperatureBias < -0.08) {
+      return [
+        { id: "A", label: "冷调平衡", description: "收敛偏冷色偏，同时保持肤色自然。", style: "natural" },
+        { id: "B", label: "清透肤色", description: "降低灰雾感，让肤色与层次更通透。", style: "airy" },
+        { id: "C", label: "电影冷调", description: "保留冷色氛围，柔化高光并控制对比。", style: "cinematic" },
+      ];
+    }
+  }
+
+  if (category === "landscape" || category === "mountain" || category === "ocean") {
+    if (aquatic) {
+      return [
+        { id: "A", label: "清透水色", description: "保留蓝青层次，提升天空与水面的通透感。", style: "airy" },
+        { id: "B", label: "蓝青强化", description: "加强水体和天空色彩，让冷色关系更鲜明。", style: "vivid" },
+        { id: "C", label: "日落暖海", description: "暖化高光，压低阴影，形成日落氛围。", style: "warm_film" },
+      ];
+    }
+    if (clipped) {
+      return [
+        { id: "A", label: "高光收敛", description: "降低天空与云层高光，找回亮部层次。", style: "soft" },
+        { id: "B", label: "清透空气感", description: "适度去雾并提亮中间调，保持远景细节。", style: "airy" },
+        { id: "C", label: "柔和远山", description: "压低对比与清晰度，让空间层次更柔和。", style: "cinematic" },
+      ];
+    }
+    if (dark) {
+      return [
+        { id: "A", label: "自然提亮", description: "抬升阴影与中间调，保留山脉或海岸结构。", style: "natural" },
+        { id: "B", label: "暮色冷暖", description: "拉开冷暖关系，建立黄昏或夜景氛围。", style: "cinematic" },
+        { id: "C", label: "电影山野", description: "轻抬阴影并加入克制色彩与颗粒。", style: "warm_film" },
+      ];
+    }
+    if (lush) {
+      return [
+        { id: "A", label: "自然山野", description: "保护绿色和岩石细节，保持自然关系。", style: "natural" },
+        { id: "B", label: "清透远山", description: "增强空气感，保留天空与远景层次。", style: "airy" },
+        { id: "C", label: "胶片旅行", description: "低饱和、暖阴影与轻微颗粒的旅行质感。", style: "warm_film" },
+      ];
+    }
+  }
+
+  if (category === "night" || category === "city") {
+    if (hints.skyRatio + hints.waterRatio > 0.12) {
+      return [
+        { id: "A", label: "夜色保真", description: "保护霓虹与暗部，不把夜景提成白天。", style: "natural" },
+        { id: "B", label: "电影霓虹", description: "青紫暗部与柔和高光，强化电影氛围。", style: "cinematic" },
+        { id: "C", label: "暖调夜行", description: "暖化灯光并保留环境暗部。", style: "warm_film" },
+      ];
+    }
+    if (bright) {
+      return [
+        { id: "A", label: "自然压光", description: "收敛过亮区域，保留灯光色彩。", style: "natural" },
+        { id: "B", label: "霓虹对比", description: "增强灯光对比与颜色分离。", style: "vivid" },
+        { id: "C", label: "电影夜色", description: "压低高光并加入克制颗粒与暗角。", style: "cinematic" },
+      ];
+    }
+  }
+
+  if (category === "still_life") {
+    return dark
+      ? [
+          { id: "A", label: "自然提亮", description: "轻抬阴影，让材质与轮廓更清楚。", style: "natural" },
+          { id: "B", label: "暖调静物", description: "暖化高光并保留物体纹理。", style: "warm_film" },
+          { id: "C", label: "柔光质感", description: "降低对比与高光刺激，突出细节。", style: "soft" },
+        ]
+      : directions.still_life;
+  }
+
   return directions[category];
 }

@@ -21,12 +21,12 @@ function tune(base: ColorParams, patch: Partial<ColorParams>): ColorParams {
 }
 
 const stylePatches: Record<CandidateStyle, Partial<ColorParams>> = {
-  natural: { saturation: -2, clarity: -1 },
-  warm_film: { temperature: 5, tint: 2, saturation: 2, highlights: -3, grain: 3 },
-  airy: { exposure: 2, contrast: -2, dehaze: 5, clarity: 2, saturation: -1 },
-  cinematic: { contrast: 2, highlights: -5, shadows: 4, clarity: -4, grain: 2, vignette: -2 },
-  vivid: { contrast: 3, saturation: 5, clarity: 2 },
-  soft: { highlights: -4, shadows: 3, clarity: -4, grain: 1 },
+  natural: { exposure: 1, saturation: -4, clarity: -2 },
+  warm_film: { temperature: 10, tint: 4, saturation: 7, highlights: -6, shadows: 4, grain: 6, vignette: -3 },
+  airy: { exposure: 5, contrast: -4, dehaze: 10, clarity: 5, saturation: 2, temperature: -2 },
+  cinematic: { contrast: 5, highlights: -10, shadows: 7, clarity: -6, grain: 4, vignette: -4, saturation: -3, tint: 3 },
+  vivid: { contrast: 6, saturation: 12, clarity: 4, dehaze: 4, temperature: 3 },
+  soft: { highlights: -9, shadows: 6, clarity: -7, grain: 2, saturation: -1 },
 };
 
 const fallbackDirections: CandidateDirection[] = [

@@ -187,6 +187,7 @@ export function getSceneHints(image: RgbaImage): SceneHints {
   let sky = 0;
   let nature = 0;
   let water = 0;
+  let warmth = 0;
 
   for (let index = 0; index < image.data.length; index += 16) {
     const pixel = index / 4;
@@ -200,6 +201,7 @@ export function getSceneHints(image: RgbaImage): SceneHints {
     if (y < image.height * 0.55 && isSky(r, g, b)) sky += 1;
     if (g > 62 && g > r * 1.06 && g > b * 1.01) nature += 1;
     if (b > 70 && b > r * 1.1 && b > g * 1.025) water += 1;
+    warmth += (r - b) / 255;
     sampled += 1;
   }
 
@@ -212,5 +214,6 @@ export function getSceneHints(image: RgbaImage): SceneHints {
     natureRatio: nature / total,
     waterRatio: water / total,
     aspectRatio: image.width / Math.max(1, image.height),
+    temperatureBias: warmth / total,
   };
 }

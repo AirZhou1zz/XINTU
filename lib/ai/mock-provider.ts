@@ -28,7 +28,7 @@ function planFor(input: AnalyzeInput, detected: ReturnType<typeof detectScene>):
     sceneSummary,
     sceneCategory: detected.category,
     sceneConfidence: detected.confidence,
-    directions: directionsForScene(detected.category),
+    directions: directionsForScene(detected.category, input.sceneHints, input.prompt),
     tools: Array.from(tools).slice(0, 4),
     constraints: ["不生成新像素", "保护画面结构", "最多修正 2 轮"],
   };
