@@ -296,7 +296,7 @@ const Frame91696 = () => (
                                                                     id="9_1802"
                                                                     className="x-copy-9_1802 x-relative-no-shrink"
                                                                 >
-                                                                    {"ΔE LAB"}
+                                                                    {"ΔE2000"}
                                                                 </p>
                                                                 <p
                                                                     id="9_1803"

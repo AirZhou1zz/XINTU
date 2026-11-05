@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { EvaluationResult } from "@/lib/color/types";
 
@@ -9,7 +9,7 @@ type EvaluationPanelProps = {
 
 export function EvaluationPanel({ evaluation, iterations }: EvaluationPanelProps) {
   const metrics = [
-    { label: "ΔE LAB", value: evaluation.deltaE === null ? "—" : evaluation.deltaE.toFixed(1) },
+    { label: "ΔE2000", value: evaluation.deltaE === null ? "—" : evaluation.deltaE.toFixed(1) },
     { label: "肤色偏移", value: evaluation.skinShift.toFixed(1) },
     { label: "天空偏移", value: evaluation.skyShift.toFixed(1) },
     { label: "结构保持", value: `${(evaluation.structureScore * 100).toFixed(1)}%` },

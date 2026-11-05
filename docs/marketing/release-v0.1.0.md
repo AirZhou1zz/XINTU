@@ -43,7 +43,7 @@ XINTU is an experimental reference-based color-grading workflow. The model plans
 ## Verification
 
 - 5 test files
-- 21 tests
+- 25 tests
 - ESLint
 - TypeScript typecheck
 - Production build

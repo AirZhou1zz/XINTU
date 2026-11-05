@@ -64,7 +64,7 @@ const workflow = [
 const metrics = [
   { value: "03", label: "候选方案", detail: "同一次任务生成 3 个可比较结果" },
   { value: "13", label: "手动参数", detail: "在 AI 结果上继续精细调整" },
-  { value: "21", label: "自动化测试", detail: "5 个测试文件全部通过" },
+  { value: "25", label: "自动化测试", detail: "5 个测试文件全部通过" },
   { value: "02", label: "最大修正轮次", detail: "用明确边界控制成本与等待" },
 ];
 
