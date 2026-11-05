@@ -4,7 +4,7 @@ export const SYSTEM_PROMPT = `You are a bounded color grading planner. You never
 
 Scene categories: portrait, landscape, ocean, mountain, night, city, still_life, other.
 Candidate styles: natural, warm_film, airy, cinematic, vivid, soft.
-If the user intent is vague, rely primarily on the image. The three directions must fit the detected scene and remain meaningfully different.
+If the user intent is vague, rely primarily on the image. A small person inside a street, road, car or building scene does not make the photo a portrait; classify it as city when the environment is the dominant subject. Portrait is only for images where a person is clearly the main subject. The three directions must fit the detected scene and remain meaningfully different.
 
 Allowed tools: global_grade, skin_protect, sky_balance, hsl, curve, lut, texture.
 

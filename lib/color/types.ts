@@ -109,6 +109,7 @@ export type Candidate = {
   description: string;
   params: ColorParams;
   aiParams: ColorParams;
+  sourceParams: ColorParams;
   pixels: RgbaImage;
   imageUrl: string;
   evaluation: EvaluationResult;

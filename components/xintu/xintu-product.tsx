@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowLeftRight, Sparkles } from "lucide-react";
 import { ManualParameterPanel } from "./manual-parameter-panel";
+import { GradeSelectorDock } from "./grade-selector-dock";
 import { useStudio } from "@/components/studio/use-studio";
 import Frame91309 from "./frames/Frame91309";
 import Frame91406 from "./frames/Frame91406";
@@ -569,6 +570,12 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
         <button type="button" className="xintu-mobile-demo" onClick={() => void startWithDemo()}>
           没有照片？载入演示
         </button>
+      ) : null}      {screen === "upload" ? (
+        <GradeSelectorDock
+          className="is-input"
+          strength={studio.strength}
+          onStrengthChange={studio.setStrength}
+        />
       ) : null}
       <div ref={viewportRef} className="xintu-viewport">
         <div
@@ -625,6 +632,16 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
                 />
               </div>
             ) : null}
+            {screen === "results" && studio.activeCandidate ? (
+              <GradeSelectorDock
+                className="is-results"
+                candidates={studio.candidates}
+                activeCandidateId={studio.activeCandidate.id}
+                onSelectCandidate={studio.selectCandidate}
+                strength={studio.strength}
+                onStrengthChange={studio.changeStrength}
+              />
+            ) : null}
           </div>
         </div>
       {screen === "results" && studio.activeCandidate ? (
@@ -640,9 +657,6 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
           visualReview={studio.visualReview}
           isReviewing={studio.isReviewing}
           sceneCategory={studio.plan?.sceneCategory ?? "other"}
-          candidates={studio.candidates}
-          activeCandidateId={studio.activeCandidate.id}
-          onSelectCandidate={studio.selectCandidate}
           subjectiveScore={subjectiveScore}
           onSubjectiveScore={setSubjectiveScore}
           onChange={studio.updateParam}

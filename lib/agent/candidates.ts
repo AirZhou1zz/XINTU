@@ -1,4 +1,4 @@
-import type { CandidateDirection, CandidateStyle, ColorParams } from "@/lib/color/types";
+import type { CandidateDirection, CandidateStyle, ColorParams, Strength } from "@/lib/color/types";
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -43,4 +43,26 @@ export const buildCandidateVariants = (base: ColorParams, directions: CandidateD
     description: direction.description,
     params: tune(base, stylePatches[direction.style]),
   }));
+};
+
+export const strengthFactors: Record<Strength, number> = {
+  low: 0.6,
+  medium: 1,
+  high: 1.35,
+};
+
+function mapParams(params: ColorParams, transform: (value: number, key: keyof ColorParams) => number): ColorParams {
+  return Object.fromEntries(
+    Object.entries(params).map(([key, value]) => [key, transform(value, key as keyof ColorParams)]),
+  ) as ColorParams;
+}
+
+export const scaleParamsForStrength = (params: ColorParams, strength: Strength) => {
+  const factor = strengthFactors[strength];
+  return mapParams(params, (value, key) => clamp(Math.round(value * factor), key === "grain" ? 0 : -100, 100));
+};
+
+export const paramsAtReferenceStrength = (params: ColorParams, strength: Strength) => {
+  const factor = strengthFactors[strength];
+  return mapParams(params, (value, key) => clamp(Math.round(value / factor), key === "grain" ? 0 : -100, 100));
 };

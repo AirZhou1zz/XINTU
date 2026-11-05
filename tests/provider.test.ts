@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildCandidateVariants } from "@/lib/agent/candidates";
+import { buildCandidateVariants, scaleParamsForStrength } from "@/lib/agent/candidates";
 import { MockProvider } from "@/lib/ai/mock-provider";
 import { OpenAICompatibleProvider } from "@/lib/ai/openai-compatible";
 import { getProvider } from "@/lib/ai/provider";
@@ -150,6 +150,27 @@ describe("mock provider and candidates", () => {
     expect(output.plan.directions.map((item) => `${item.label} ${item.description}`).join(" ")).not.toMatch(/肤色|皮肤|肤质/);
   });
 
+  it("treats a street and car scene as city even when people are present", async () => {
+    const provider = new MockProvider();
+    const output = await provider.analyze({
+      prompt: "街道和汽车是主体，画面里有人，做成电影感",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: {
+        averageLuma: 0.52,
+        clippingRatio: 0.03,
+        skinRatio: 0.09,
+        centralSkinRatio: 0.05,
+        skyRatio: 0.06,
+        natureRatio: 0.04,
+        waterRatio: 0,
+        aspectRatio: 1.5,
+        temperatureBias: 0.01,
+      },
+    });
+    expect(output.plan.sceneCategory).toBe("city");
+    expect(output.plan.directions.map((item) => `${item.label} ${item.description}`).join(" ")).not.toMatch(/肤色|皮肤|肤质/);
+  });
   it("keeps a centered portrait classified as portrait", async () => {
     const provider = new MockProvider();
     const output = await provider.analyze({
@@ -231,6 +252,15 @@ describe("mock provider and candidates", () => {
     const saturation = variants.map((item) => item.params.saturation);
     expect(Math.max(...temperatures) - Math.min(...temperatures)).toBeGreaterThanOrEqual(10);
     expect(Math.max(...saturation) - Math.min(...saturation)).toBeGreaterThanOrEqual(10);
+  });
+  it("scales every candidate parameter between weak, medium and strong intensity", () => {
+    const low = scaleParamsForStrength(testParams, "low");
+    const medium = scaleParamsForStrength(testParams, "medium");
+    const high = scaleParamsForStrength(testParams, "high");
+    expect(low.exposure).toBeLessThan(medium.exposure);
+    expect(medium.exposure).toBeLessThan(high.exposure);
+    expect(low.dehaze).toBeLessThan(medium.dehaze);
+    expect(medium.dehaze).toBeLessThan(high.dehaze);
   });
   it("builds three bounded variants", () => {
     const base = testParams;

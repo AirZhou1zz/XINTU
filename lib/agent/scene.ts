@@ -62,12 +62,12 @@ function promptIncludes(prompt: string, words: string[]) {
 }
 
 export function detectScene(hints: SceneHints | undefined, prompt: string) {
-  const explicitPortrait = promptIncludes(prompt, ["人像", "肖像", "人物", "自拍", "写真"]);
+  const explicitPortrait = promptIncludes(prompt, ["人像", "肖像", "自拍", "写真", "证件照"]);
   const explicitOcean = promptIncludes(prompt, ["海", "海岸", "沙滩", "海边"]);
   const explicitMountain = promptIncludes(prompt, ["山", "森林", "草原", "树林"]);
   const explicitLandscape = promptIncludes(prompt, ["风景", "风光", "远景", "全景"]);
   const explicitNight = promptIncludes(prompt, ["夜景", "霓虹", "夜晚"]);
-  const explicitCity = promptIncludes(prompt, ["城市", "街景", "建筑"]);
+  const explicitCity = promptIncludes(prompt, ["城市", "街道", "街景", "马路", "汽车", "车辆", "车流", "建筑"]);
 
   if (!hints) {
     const category: SceneCategory = explicitPortrait
@@ -86,6 +86,9 @@ export function detectScene(hints: SceneHints | undefined, prompt: string) {
     return { category, confidence: category === "other" ? 0.4 : 0.62 };
   }
 
+  if (explicitCity && !explicitPortrait) {
+    return { category: "city" as const, confidence: 0.86 };
+  }
   if (explicitPortrait) {
     return { category: "portrait" as const, confidence: clamp(0.72 + hints.skinRatio, 0.72, 0.96) };
   }
@@ -104,9 +107,9 @@ export function detectScene(hints: SceneHints | undefined, prompt: string) {
   const centralSkinRatio = hints.centralSkinRatio ?? hints.skinRatio * 0.5;
   const skinCenterShare = centralSkinRatio / Math.max(0.001, hints.skinRatio);
   const portraitEvidence =
-    hints.skinRatio >= 0.075
-    && centralSkinRatio >= 0.05
-    && skinCenterShare >= 0.43;
+    hints.skinRatio >= 0.09
+    && centralSkinRatio >= 0.055
+    && skinCenterShare >= 0.45;
 
   if (portraitEvidence) {
     return {

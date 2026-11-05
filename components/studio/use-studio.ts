@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildCandidateVariants } from "@/lib/agent/candidates";
+import { buildCandidateVariants, paramsAtReferenceStrength, scaleParamsForStrength } from "@/lib/agent/candidates";
 import { runBoundedAgent } from "@/lib/agent/loop";
 import { sceneLabels } from "@/lib/agent/scene";
 import { visualReviewSchema } from "@/lib/agent/visual-review";
@@ -186,14 +186,37 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
       setCandidates((current) =>
         current.map((candidate) =>
           candidate.id === candidateId
-            ? { ...candidate, params, pixels: rendered, imageUrl: previewUrl(rendered), evaluation: nextEvaluation }
+            ? { ...candidate, params, aiParams: candidate.aiParams, sourceParams: paramsAtReferenceStrength(params, strength), pixels: rendered, imageUrl: previewUrl(rendered), evaluation: nextEvaluation }
             : candidate,
         ),
       );
       setEvaluation(nextEvaluation);
     }, 64);
-  }, [activeCandidate, reference, sceneCategory, target]);
+  }, [activeCandidate, reference, sceneCategory, strength, target]);
 
+  const changeStrength = useCallback((nextStrength: Strength) => {
+    if (nextStrength === strength) return;
+    setStrength(nextStrength);
+    if (!target || candidates.length === 0) return;
+
+    setVisualReview(null);
+    const updated = candidates.map((candidate) => {
+      const params = scaleParamsForStrength(candidate.sourceParams, nextStrength);
+      const pixels = renderColorGrade(target.pixels, params);
+      const evaluation = evaluateImage(target.pixels, pixels, reference?.pixels ?? null, true, sceneCategory);
+      return {
+        ...candidate,
+        params,
+        aiParams: params,
+        pixels,
+        imageUrl: previewUrl(pixels),
+        evaluation,
+      };
+    });
+    setCandidates(updated);
+    const active = updated.find((candidate) => candidate.id === activeCandidateId);
+    if (active) setEvaluation(active.evaluation);
+  }, [activeCandidateId, candidates, reference, sceneCategory, strength, target]);
   const analyze = useCallback(async (targetOverride?: LoadedImageState, forceMock = false) => {
     const activeTarget = targetOverride ?? target;
     if (!activeTarget) {
@@ -314,13 +337,17 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
       const currentParams = loop.params;
 
       setStatus("rendering");
-      const variants = buildCandidateVariants(currentParams, analyzed.plan.directions);
+      const referenceBase = paramsAtReferenceStrength(currentParams, strength);
+      const variants = buildCandidateVariants(referenceBase, analyzed.plan.directions);
       const renderedCandidates = variants.map((variant) => {
-        const pixels = renderColorGrade(activeTarget.pixels, variant.params);
+        const params = scaleParamsForStrength(variant.params, strength);
+        const pixels = renderColorGrade(activeTarget.pixels, params);
         const candidateEvaluation = evaluateImage(activeTarget.pixels, pixels, reference?.pixels ?? null, true, analyzed.plan.sceneCategory);
         return {
           ...variant,
-          aiParams: variant.params,
+          params,
+          aiParams: params,
+          sourceParams: variant.params,
           pixels,
           imageUrl: previewUrl(pixels),
           evaluation: candidateEvaluation,
@@ -396,6 +423,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
       const nextCandidate: Candidate = {
         ...activeCandidate,
         params: refined.params,
+        sourceParams: paramsAtReferenceStrength(refined.params, strength),
         pixels,
         imageUrl: previewUrl(pixels),
         evaluation: nextEvaluation,
@@ -527,6 +555,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
     clearTarget,
     analyze,
     updateParam,
+    changeStrength,
     resetActiveParams,
     refineFromFeedback,
     reviewCurrentCandidate,
