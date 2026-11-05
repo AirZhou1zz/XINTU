@@ -56,11 +56,11 @@ export const REVIEW_SYSTEM_PROMPT = `You are a bounded visual color-grading revi
   "issues": ["up to 3"],
   "nextActions": ["up to 3"]
 }
-Focus on color harmony, skin preservation, sky handling, clipping, structure, and whether the result matches the intent.`;
+Focus on color harmony, skin preservation, sky handling, clipping, structure, and whether the result matches the intent. Write summary, strengths, issues, and nextActions in Simplified Chinese. Keep the verdict values exactly "pass" or "needs_work".`;
 
 export function buildReviewPrompt(
   prompt: string,
   heuristics: unknown,
 ) {
-  return `User intent: ${prompt}\nDeterministic metrics: ${JSON.stringify(heuristics)}\nThe first image is the rendered result. Return only the JSON object.`;
+  return `User intent: ${prompt}\nDeterministic metrics: ${JSON.stringify(heuristics)}\nThe first image is the rendered result. Return only the JSON object. All human-readable fields must be Simplified Chinese.`;
 }
