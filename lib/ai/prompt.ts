@@ -43,7 +43,18 @@ Return exactly this shape:
 Directions must contain exactly A, B and C. All numeric parameters must be between -100 and 100, except grain which is 0 to 100. Keep edits conservative and preserve structure.`;
 
 export function buildAnalyzePrompt(prompt: string, strength: string, hints?: SceneHints) {
-  return `User intent: ${prompt}\nStrength: ${strength}\nScene hints: ${JSON.stringify(hints ?? {})}\nReturn only the JSON object.`;
+  const auxiliaryHints = hints
+    ? {
+        averageLuma: hints.averageLuma,
+        clippingRatio: hints.clippingRatio,
+        skyRatio: hints.skyRatio,
+        natureRatio: hints.natureRatio,
+        waterRatio: hints.waterRatio,
+        aspectRatio: hints.aspectRatio,
+        temperatureBias: hints.temperatureBias,
+      }
+    : {};
+  return `User intent: ${prompt}\nStrength: ${strength}\nAuxiliary image hints: ${JSON.stringify(auxiliaryHints)}\nSkin-color ratios are intentionally omitted because they are unreliable for subject classification. Decide the scene and dominant subject from the image itself. A person inside a street, car or building scene must not make it a portrait unless the person is visually dominant.\nReturn only the JSON object.`;
 }
 
 export function buildRefinePrompt(prompt: string, params: unknown, findings: string[]) {

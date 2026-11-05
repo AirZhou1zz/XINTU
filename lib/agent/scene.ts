@@ -142,11 +142,26 @@ export function reconcileScenePlan(
   hints: SceneHints | undefined,
   prompt: string,
 ): AgentPlan {
+  const directionText = plan.directions.map((item) => `${item.label} ${item.description}`).join(" ");
+  const semanticText = `${plan.sceneSummary} ${directionText}`;
+  const hasPortraitCopy = /肤色|皮肤|人像|面部|肤质/.test(directionText);
+  const semanticPortrait = /人物占主导|人物是主体|主体是人物|主体为人物|人像特写|肖像特写|面部特写/.test(semanticText);
+  const semanticCity = /街景|街道|马路|汽车|车辆|城市|建筑|塔楼|楼宇|路面/.test(semanticText);
+  const explicitPortraitIntent = promptIncludes(prompt, ["人像", "肖像", "自拍", "写真", "证件照"]);
+
+  if (semanticCity && !semanticPortrait && !explicitPortraitIntent) {
+    return {
+      ...plan,
+      sceneCategory: "city",
+      sceneConfidence: Math.max(plan.sceneConfidence, 0.86),
+      sceneSummary: plan.sceneSummary,
+      directions: hasPortraitCopy ? directionsForScene("city", hints, prompt) : plan.directions,
+    };
+  }
+
   const detected = detectScene(hints, prompt);
   if (detected.confidence < 0.62) return plan;
 
-  const directionText = plan.directions.map((item) => `${item.label} ${item.description}`).join(" ");
-  const hasPortraitCopy = /肤色|皮肤|人像|面部|肤质/.test(directionText);
   const portraitMismatch =
     (plan.sceneCategory === "portrait") !== (detected.category === "portrait");
   const copyMismatch = detected.category !== "portrait" && hasPortraitCopy;

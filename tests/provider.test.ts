@@ -224,6 +224,34 @@ describe("mock provider and candidates", () => {
     expect(guarded.sceneCategory).not.toBe("portrait");
     expect(guarded.directions.map((item) => `${item.label} ${item.description}`).join(" ")).not.toMatch(/肤色|皮肤|肤质/);
   });
+  it("keeps a city scene when the model summary and directions outweigh skin heuristics", async () => {
+    const provider = new MockProvider();
+    const hints = {
+      averageLuma: 0.367,
+      clippingRatio: 0.068,
+      skinRatio: 0.181,
+      centralSkinRatio: 0.1,
+      skyRatio: 0.224,
+      natureRatio: 0.001,
+      waterRatio: 0.172,
+      aspectRatio: 0.8,
+      temperatureBias: 0,
+    };
+    const portraitOutput = await provider.analyze({
+      prompt: "自然、通透，保留真实质感与画面层次",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: hints,
+    });
+    const reconciled = reconcileScenePlan({
+      ...portraitOutput.plan,
+      sceneCategory: "portrait",
+      sceneSummary: "城市街景，砖石建筑、石板路、复古汽车与远处钟楼为主，人物较小。",
+    }, hints, "自然、通透，保留真实质感与画面层次");
+
+    expect(reconciled.sceneCategory).toBe("city");
+    expect(reconciled.sceneSummary).toContain("城市街景");
+  });
   it("returns a bounded local visual review", async () => {
     const provider = new MockProvider();
     const review = await provider.review({
