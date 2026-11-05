@@ -1,5 +1,6 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { renderColorGrade } from "@/lib/color/engine";
+import { buildCandidateVariants } from "@/lib/agent/candidates";
 import type { ColorParams, RgbaImage } from "@/lib/color/types";
 
 const baseParams: ColorParams = {
@@ -54,6 +55,28 @@ describe("color engine", () => {
     expect(Math.abs(skinDiff)).toBeGreaterThan(Math.abs(neutralDiff));
   });
 
+  it("renders candidate directions with a visibly stronger difference", () => {
+    const source = image();
+    const variants = buildCandidateVariants(baseParams);
+    const rendered = variants.map((variant) => renderColorGrade(source, variant.params));
+    const channelDistance = (left: RgbaImage, right: RgbaImage) => {
+      let total = 0;
+      let channels = 0;
+      for (let index = 0; index < left.data.length; index += 4) {
+        total += Math.abs(left.data[index] - right.data[index]);
+        total += Math.abs(left.data[index + 1] - right.data[index + 1]);
+        total += Math.abs(left.data[index + 2] - right.data[index + 2]);
+        channels += 3;
+      }
+      return total / Math.max(1, channels);
+    };
+
+    for (const result of rendered) {
+      expect(channelDistance(source, result)).toBeGreaterThan(2.5);
+    }
+    expect(channelDistance(rendered[0], rendered[1])).toBeGreaterThan(3);
+    expect(channelDistance(rendered[1], rendered[2])).toBeGreaterThan(3);
+  });
   it("preserves alpha", () => {
     const source = image();
     const result = renderColorGrade(source, { ...baseParams, exposure: 10 });

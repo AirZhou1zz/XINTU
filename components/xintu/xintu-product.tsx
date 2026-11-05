@@ -640,6 +640,9 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
           visualReview={studio.visualReview}
           isReviewing={studio.isReviewing}
           sceneCategory={studio.plan?.sceneCategory ?? "other"}
+          candidates={studio.candidates}
+          activeCandidateId={studio.activeCandidate.id}
+          onSelectCandidate={studio.selectCandidate}
           subjectiveScore={subjectiveScore}
           onSubjectiveScore={setSubjectiveScore}
           onChange={studio.updateParam}

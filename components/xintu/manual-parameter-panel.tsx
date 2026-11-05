@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, RotateCcw, ScanEye, SlidersHorizontal, Star, Timer } from "lucide-react";
-import type { ColorParams, EvaluationResult, SceneCategory } from "@/lib/color/types";
+import type { Candidate, ColorParams, EvaluationResult, SceneCategory } from "@/lib/color/types";
 import { sceneLabels } from "@/lib/agent/scene";
 import type { StudioConversationMessage } from "@/components/studio/use-studio";
 import type { VisualReview } from "@/lib/agent/visual-review";
@@ -53,6 +53,9 @@ type ManualParameterPanelProps = {
   visualReview: VisualReview | null;
   isReviewing: boolean;
   sceneCategory: SceneCategory;
+  candidates: Array<Pick<Candidate, "id" | "label" | "description">>;
+  activeCandidateId: Candidate["id"];
+  onSelectCandidate: (id: Candidate["id"]) => void;
   subjectiveScore: number | null;
   onSubjectiveScore: (score: number) => void;
   onChange: (key: keyof ColorParams, value: number) => void;
@@ -74,6 +77,9 @@ export function ManualParameterPanel({
   visualReview,
   isReviewing,
   sceneCategory,
+  candidates,
+  activeCandidateId,
+  onSelectCandidate,
   subjectiveScore,
   onSubjectiveScore,
   onChange,
@@ -120,6 +126,27 @@ export function ManualParameterPanel({
       </div>
 
       <div className="xintu-parameter-scroll">
+        <section className="xintu-candidate-switcher" aria-label="调色候选">
+          <div className="xintu-candidate-switcher-head">
+            <span>GRADE DIRECTIONS</span>
+            <small>点击切换，画面即时更新</small>
+          </div>
+          <div className="xintu-candidate-tabs">
+            {candidates.map((candidate) => (
+              <button
+                type="button"
+                key={candidate.id}
+                className={candidate.id === activeCandidateId ? "is-active" : ""}
+                aria-pressed={candidate.id === activeCandidateId}
+                onClick={() => onSelectCandidate(candidate.id)}
+              >
+                <span>{candidate.id}</span>
+                <strong>{candidate.label}</strong>
+              </button>
+            ))}
+          </div>
+          <p>{candidates.find((candidate) => candidate.id === activeCandidateId)?.description}</p>
+        </section>
         <section className="xintu-visual-review">
           <div className="xintu-visual-review-head">
             <div>

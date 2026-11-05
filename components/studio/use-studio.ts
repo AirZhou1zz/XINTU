@@ -54,6 +54,11 @@ function metricSummary(result: EvaluationResult) {
   return `${delta} · 肤色 ${result.skinShift.toFixed(1)} · 天空 ${result.skyShift.toFixed(1)} · 结构 ${(result.structureScore * 100).toFixed(1)}%`;
 }
 
+function candidateReviewKey(candidate: Candidate | null) {
+  if (!candidate) return "";
+  const paramValues = Object.values(candidate.params).join(",");
+  return `${candidate.id}:${paramValues}:${candidate.evaluation.skinShift.toFixed(1)}:${candidate.evaluation.skyShift.toFixed(1)}`;
+}
 function previewUrl(pixels: Candidate["pixels"]) {
   return rgbaToDataUrl(pixels, "image/jpeg", 0.92);
 }
@@ -78,6 +83,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
   const [visualReview, setVisualReview] = useState<VisualReview | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const lastReviewKeyRef = useRef("");
+  const latestCandidateRef = useRef<Candidate | null>(null);
   const renderTimerRef = useRef<number | null>(null);
 
   const activeCandidate = useMemo(
@@ -86,6 +92,11 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
   );
 
   const isBusy = status === "loading" || status === "analyzing" || status === "rendering" || status === "evaluating" || status === "refining";
+
+  useEffect(() => {
+    latestCandidateRef.current = activeCandidate;
+  }, [activeCandidate]);
+
   const sceneCategory = plan?.sceneCategory ?? "other";
 
   useEffect(() => () => {
@@ -411,6 +422,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
   }, [activeCandidate, manualRefinements, prompt, reference, sceneCategory, strength, target]);
   const reviewCurrentCandidate = useCallback(async () => {
     if (!target || !activeCandidate || isReviewing) return false;
+    const reviewedCandidateKey = candidateReviewKey(activeCandidate);
     setIsReviewing(true);
     try {
       const response = await fetch("/api/agent/review", {
@@ -437,6 +449,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
         throw new Error(body?.error || "视觉复核失败。");
       }
       const nextReview = visualReviewSchema.parse(await response.json());
+      if (candidateReviewKey(latestCandidateRef.current) !== reviewedCandidateKey) return false;
       setVisualReview(nextReview);
       setConversation((current) => [...current, {
         role: "assistant",
@@ -444,6 +457,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
       }]);
       return true;
     } catch (reviewError) {
+      if (candidateReviewKey(latestCandidateRef.current) !== reviewedCandidateKey) return false;
       const message = reviewError instanceof Error ? reviewError.message : "视觉复核失败。";
       setConversation((current) => [...current, { role: "assistant", text: `视觉复核失败：${message}` }]);
       return false;
@@ -451,11 +465,7 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
       setIsReviewing(false);
     }
   }, [activeCandidate, isReviewing, prompt, reference, target]);
-  const reviewKey = useMemo(() => {
-    if (!activeCandidate) return "";
-    const paramValues = Object.values(activeCandidate.params).join(",");
-    return `${activeCandidate.id}:${paramValues}:${activeCandidate.evaluation.skinShift.toFixed(1)}:${activeCandidate.evaluation.skyShift.toFixed(1)}`;
-  }, [activeCandidate]);
+  const reviewKey = useMemo(() => candidateReviewKey(activeCandidate), [activeCandidate]);
 
   useEffect(() => {
     if (status !== "done" || !activeCandidate || isReviewing || !reviewKey) return;

@@ -21,12 +21,12 @@ function tune(base: ColorParams, patch: Partial<ColorParams>): ColorParams {
 }
 
 const stylePatches: Record<CandidateStyle, Partial<ColorParams>> = {
-  natural: { exposure: 1, saturation: -4, clarity: -2 },
-  warm_film: { temperature: 10, tint: 4, saturation: 7, highlights: -6, shadows: 4, grain: 6, vignette: -3 },
-  airy: { exposure: 5, contrast: -4, dehaze: 10, clarity: 5, saturation: 2, temperature: -2 },
-  cinematic: { contrast: 5, highlights: -10, shadows: 7, clarity: -6, grain: 4, vignette: -4, saturation: -3, tint: 3 },
-  vivid: { contrast: 6, saturation: 12, clarity: 4, dehaze: 4, temperature: 3 },
-  soft: { highlights: -9, shadows: 6, clarity: -7, grain: 2, saturation: -1 },
+  natural: { exposure: 5, contrast: 7, saturation: 8, clarity: 4, highlights: -6, shadows: 6 },
+  warm_film: { temperature: 24, tint: 8, saturation: 20, contrast: 5, highlights: -14, shadows: 12, grain: 9, vignette: -10 },
+  airy: { exposure: 12, contrast: -2, temperature: -6, saturation: 10, highlights: -8, shadows: 10, dehaze: 22, clarity: 10, vignette: -4 },
+  cinematic: { temperature: -6, contrast: 18, highlights: -28, shadows: 22, clarity: -10, grain: 8, vignette: -14, saturation: -8, tint: 10 },
+  vivid: { temperature: 7, contrast: 16, saturation: 34, clarity: 12, dehaze: 10, highlights: -8, shadows: 6 },
+  soft: { exposure: 5, contrast: -8, highlights: -20, shadows: 18, clarity: -11, grain: 4, saturation: 4 },
 };
 
 const fallbackDirections: CandidateDirection[] = [
