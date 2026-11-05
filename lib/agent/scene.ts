@@ -1,4 +1,4 @@
-import type { CandidateDirection, SceneCategory, SceneHints } from "@/lib/color/types";
+import type { AgentPlan, CandidateDirection, SceneCategory, SceneHints } from "@/lib/color/types";
 
 export const sceneLabels: Record<SceneCategory, string> = {
   portrait: "人像",
@@ -62,26 +62,62 @@ function promptIncludes(prompt: string, words: string[]) {
 }
 
 export function detectScene(hints: SceneHints | undefined, prompt: string) {
+  const explicitPortrait = promptIncludes(prompt, ["人像", "肖像", "人物", "自拍", "写真"]);
+  const explicitOcean = promptIncludes(prompt, ["海", "海岸", "沙滩", "海边"]);
+  const explicitMountain = promptIncludes(prompt, ["山", "森林", "草原", "树林"]);
+  const explicitLandscape = promptIncludes(prompt, ["风景", "风光", "远景", "全景"]);
+  const explicitNight = promptIncludes(prompt, ["夜景", "霓虹", "夜晚"]);
+  const explicitCity = promptIncludes(prompt, ["城市", "街景", "建筑"]);
+
   if (!hints) {
-    const category: SceneCategory = promptIncludes(prompt, ["人", "肖像", "肤", "自拍"])
+    const category: SceneCategory = explicitPortrait
       ? "portrait"
-      : promptIncludes(prompt, ["海", "海岸", "沙滩"])
+      : explicitOcean
         ? "ocean"
-        : promptIncludes(prompt, ["山", "森林", "树"])
+        : explicitMountain
           ? "mountain"
-          : promptIncludes(prompt, ["夜", "霓虹", "城市", "街"])
-            ? "night"
-            : "other";
-    return { category, confidence: 0.4 };
+          : explicitCity
+            ? "city"
+            : explicitNight
+              ? "night"
+              : explicitLandscape
+                ? "landscape"
+                : "other";
+    return { category, confidence: category === "other" ? 0.4 : 0.62 };
   }
 
-  if (hints.skinRatio > 0.045 || promptIncludes(prompt, ["人像", "肖像", "肤色", "自拍"])) {
-    return { category: "portrait" as const, confidence: clamp(0.58 + hints.skinRatio * 4.5, 0.58, 0.96) };
+  if (explicitPortrait) {
+    return { category: "portrait" as const, confidence: clamp(0.72 + hints.skinRatio, 0.72, 0.96) };
   }
-  if (hints.averageLuma < 0.3 || promptIncludes(prompt, ["夜景", "霓虹", "夜晚"])) {
+  if (explicitOcean) return { category: "ocean" as const, confidence: 0.84 };
+  if (explicitMountain) return { category: "mountain" as const, confidence: 0.82 };
+  if (explicitLandscape) {
+    if (hints.waterRatio > 0.18 && hints.skyRatio > 0.05) {
+      return { category: "ocean" as const, confidence: 0.78 };
+    }
+    if (hints.natureRatio > 0.16 && hints.skyRatio > 0.04) {
+      return { category: "mountain" as const, confidence: 0.76 };
+    }
+    return { category: "landscape" as const, confidence: 0.76 };
+  }
+
+  const centralSkinRatio = hints.centralSkinRatio ?? hints.skinRatio * 0.5;
+  const skinCenterShare = centralSkinRatio / Math.max(0.001, hints.skinRatio);
+  const portraitEvidence =
+    hints.skinRatio >= 0.075
+    && centralSkinRatio >= 0.05
+    && skinCenterShare >= 0.43;
+
+  if (portraitEvidence) {
     return {
-      category: (promptIncludes(prompt, ["城市", "街", "建筑"]) ? "city" : "night") as SceneCategory,
-      confidence: clamp(0.58 + (0.3 - hints.averageLuma), 0.58, 0.94),
+      category: "portrait" as const,
+      confidence: clamp(0.58 + centralSkinRatio * 2.4 + skinCenterShare * 0.18, 0.62, 0.96),
+    };
+  }
+  if (hints.averageLuma < 0.3 || explicitNight) {
+    return {
+      category: (explicitCity || promptIncludes(prompt, ["城市", "街", "建筑"]) ? "city" : "night") as SceneCategory,
+      confidence: clamp(0.58 + Math.max(0, 0.3 - hints.averageLuma), 0.58, 0.94),
     };
   }
   if (hints.waterRatio > 0.2 && hints.skyRatio > 0.06) {
@@ -90,15 +126,39 @@ export function detectScene(hints: SceneHints | undefined, prompt: string) {
   if (hints.natureRatio > 0.24 && hints.skyRatio > 0.04) {
     return { category: "mountain" as const, confidence: clamp(0.56 + hints.natureRatio * 0.7, 0.56, 0.93) };
   }
-  if (promptIncludes(prompt, ["海", "海岸", "沙滩"])) return { category: "ocean" as const, confidence: 0.72 };
-  if (promptIncludes(prompt, ["山", "森林", "草原"])) return { category: "mountain" as const, confidence: 0.7 };
-  if (promptIncludes(prompt, ["城市", "街", "建筑"])) return { category: "city" as const, confidence: 0.68 };
-  if (hints.skyRatio > 0.1 || hints.natureRatio > 0.12) {
-    return { category: "landscape" as const, confidence: clamp(0.52 + hints.skyRatio * 0.6, 0.52, 0.9) };
+  if (explicitCity) return { category: "city" as const, confidence: 0.7 };
+  if (hints.skyRatio > 0.08 || hints.natureRatio > 0.1 || hints.waterRatio > 0.08) {
+    return {
+      category: "landscape" as const,
+      confidence: clamp(0.56 + Math.max(hints.skyRatio, hints.natureRatio, hints.waterRatio) * 0.9, 0.56, 0.9),
+    };
   }
   return { category: "other" as const, confidence: 0.42 };
 }
 
+export function reconcileScenePlan(
+  plan: AgentPlan,
+  hints: SceneHints | undefined,
+  prompt: string,
+): AgentPlan {
+  const detected = detectScene(hints, prompt);
+  if (detected.confidence < 0.62) return plan;
+
+  const directionText = plan.directions.map((item) => `${item.label} ${item.description}`).join(" ");
+  const hasPortraitCopy = /肤色|皮肤|人像|面部|肤质/.test(directionText);
+  const portraitMismatch =
+    (plan.sceneCategory === "portrait") !== (detected.category === "portrait");
+  const copyMismatch = detected.category !== "portrait" && hasPortraitCopy;
+
+  if (!portraitMismatch && !copyMismatch) return plan;
+  return {
+    ...plan,
+    sceneCategory: detected.category,
+    sceneConfidence: detected.confidence,
+    sceneSummary: `${sceneLabels[detected.category]}场景，已按画面结构校正候选方向。${plan.sceneSummary}`.slice(0, 500),
+    directions: directionsForScene(detected.category, hints, prompt),
+  };
+}
 export function directionsForScene(
   category: SceneCategory,
   hints?: SceneHints,

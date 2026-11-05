@@ -56,7 +56,7 @@ function baseParams(input: AnalyzeInput, category: AgentPlan["sceneCategory"]): 
     dehaze: (outdoor || input.prompt.includes("通") ? 5 : 2) * factor,
     grain: (input.prompt.includes("胶片") || night ? 5 : 2) * factor,
     vignette: -2 * factor,
-    skinWarmth: (portrait ? 3 : 1) * factor,
+    skinWarmth: (portrait ? 3 : 0) * factor,
     skyTemperature: (outdoor || city ? -4 : -2) * factor,
   });
 }

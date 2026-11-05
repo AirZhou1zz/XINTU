@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Check, RotateCcw, ScanEye, SlidersHorizontal, Star, Timer } from "lucide-react";
-import type { ColorParams, EvaluationResult } from "@/lib/color/types";
+import type { ColorParams, EvaluationResult, SceneCategory } from "@/lib/color/types";
+import { sceneLabels } from "@/lib/agent/scene";
 import type { StudioConversationMessage } from "@/components/studio/use-studio";
 import type { VisualReview } from "@/lib/agent/visual-review";
 
@@ -51,6 +52,7 @@ type ManualParameterPanelProps = {
   busy: boolean;
   visualReview: VisualReview | null;
   isReviewing: boolean;
+  sceneCategory: SceneCategory;
   subjectiveScore: number | null;
   onSubjectiveScore: (score: number) => void;
   onChange: (key: keyof ColorParams, value: number) => void;
@@ -71,6 +73,7 @@ export function ManualParameterPanel({
   busy,
   visualReview,
   isReviewing,
+  sceneCategory,
   subjectiveScore,
   onSubjectiveScore,
   onChange,
@@ -80,6 +83,11 @@ export function ManualParameterPanel({
   onFeedback,
 }: ManualParameterPanelProps) {
   const [feedback, setFeedback] = useState("");
+  const isPortrait = sceneCategory === "portrait";
+  const visibleGroups = groups.map((group) => ({
+    ...group,
+    controls: group.controls.filter((control) => control.key !== "skinWarmth" || isPortrait),
+  })).filter((group) => group.controls.length > 0);
   const valuesUnchanged = Object.keys(params).every(
     (key) => params[key as keyof ColorParams] === aiParams[key as keyof ColorParams],
   );
@@ -104,10 +112,10 @@ export function ManualParameterPanel({
 
       <div className="xintu-parameter-metrics">
         <div><span>ΔE2000</span><strong>{evaluation.deltaE === null ? "无参考" : evaluation.deltaE.toFixed(1)}</strong></div>
-        <div><span>肤色偏移</span><strong>{evaluation.skinShift.toFixed(1)}</strong></div>
+        <div><span>识别场景</span><strong>{sceneLabels[sceneCategory]}</strong></div>
+        <div><span>{isPortrait ? "肤色偏移" : "剪切比例"}</span><strong>{isPortrait ? evaluation.skinShift.toFixed(1) : `${(evaluation.clippingRatio * 100).toFixed(1)}%`}</strong></div>
         <div><span>天空偏移</span><strong>{evaluation.skyShift.toFixed(1)}</strong></div>
         <div><span>结构保持</span><strong>{(evaluation.structureScore * 100).toFixed(1)}%</strong></div>
-        <div><span>参数合法率</span><strong>{evaluation.schemaValid ? "100%" : "0%"}</strong></div>
         <div><span>耗时 · 修正</span><strong>{duration} / 自动{iterations}轮 · 手动{manualRefinements}次</strong></div>
       </div>
 
@@ -201,7 +209,7 @@ export function ManualParameterPanel({
           </div>
         </section>
 
-        {groups.map((group) => (
+        {visibleGroups.map((group) => (
           <section className="xintu-parameter-group" key={group.label}>
             <h3>{group.label}</h3>
             {group.controls.map((control) => {

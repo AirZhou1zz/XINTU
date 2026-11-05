@@ -67,6 +67,7 @@ export type SceneHints = {
   averageLuma: number;
   clippingRatio: number;
   skinRatio: number;
+  centralSkinRatio?: number;
   skyRatio: number;
   natureRatio: number;
   waterRatio: number;

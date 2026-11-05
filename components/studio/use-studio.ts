@@ -58,7 +58,7 @@ function previewUrl(pixels: Candidate["pixels"]) {
   return rgbaToDataUrl(pixels, "image/jpeg", 0.92);
 }
 
-export function useStudio(initialPrompt = "日系、通透，肤色自然，保留皮肤纹理") {
+export function useStudio(initialPrompt = "自然、通透，保留真实质感与画面层次") {
   const [target, setTarget] = useState<LoadedImageState | null>(null);
   const [reference, setReference] = useState<LoadedImageState | null>(null);
   const [prompt, setPrompt] = useState(initialPrompt);
@@ -86,6 +86,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
   );
 
   const isBusy = status === "loading" || status === "analyzing" || status === "rendering" || status === "evaluating" || status === "refining";
+  const sceneCategory = plan?.sceneCategory ?? "other";
 
   useEffect(() => () => {
     if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
@@ -170,7 +171,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
     renderTimerRef.current = window.setTimeout(() => {
       const rendered = renderColorGrade(target.pixels, params);
-      const nextEvaluation = evaluateImage(target.pixels, rendered, reference?.pixels ?? null, true);
+      const nextEvaluation = evaluateImage(target.pixels, rendered, reference?.pixels ?? null, true, sceneCategory);
       setCandidates((current) =>
         current.map((candidate) =>
           candidate.id === candidateId
@@ -180,7 +181,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       );
       setEvaluation(nextEvaluation);
     }, 64);
-  }, [activeCandidate, reference, target]);
+  }, [activeCandidate, reference, sceneCategory, target]);
 
   const analyze = useCallback(async (targetOverride?: LoadedImageState, forceMock = false) => {
     const activeTarget = targetOverride ?? target;
@@ -246,7 +247,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
         initialParams: analyzed.params,
         maxRefinements: 2,
         evaluate: (params) =>
-          evaluateImage(activeTarget.pixels, renderColorGrade(activeTarget.pixels, params), reference?.pixels ?? null, true),
+          evaluateImage(activeTarget.pixels, renderColorGrade(activeTarget.pixels, params), reference?.pixels ?? null, true, analyzed.plan.sceneCategory),
         refine: async (params, evaluation, iteration) => {
           setStatus("refining");
           setTrace((current) =>
@@ -305,7 +306,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       const variants = buildCandidateVariants(currentParams, analyzed.plan.directions);
       const renderedCandidates = variants.map((variant) => {
         const pixels = renderColorGrade(activeTarget.pixels, variant.params);
-        const candidateEvaluation = evaluateImage(activeTarget.pixels, pixels, reference?.pixels ?? null, true);
+        const candidateEvaluation = evaluateImage(activeTarget.pixels, pixels, reference?.pixels ?? null, true, analyzed.plan.sceneCategory);
         return {
           ...variant,
           aiParams: variant.params,
@@ -380,7 +381,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
 
       const refined = refineResponseSchema.parse(await response.json());
       const pixels = renderColorGrade(target.pixels, refined.params);
-      const nextEvaluation = evaluateImage(target.pixels, pixels, reference?.pixels ?? null, true);
+      const nextEvaluation = evaluateImage(target.pixels, pixels, reference?.pixels ?? null, true, sceneCategory);
       const nextCandidate: Candidate = {
         ...activeCandidate,
         params: refined.params,
@@ -407,7 +408,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       setStatus("done");
       return false;
     }
-  }, [activeCandidate, manualRefinements, prompt, reference, strength, target]);
+  }, [activeCandidate, manualRefinements, prompt, reference, sceneCategory, strength, target]);
   const reviewCurrentCandidate = useCallback(async () => {
     if (!target || !activeCandidate || isReviewing) return false;
     setIsReviewing(true);
@@ -468,7 +469,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
   const resetActiveParams = useCallback(() => {
     if (!target || !activeCandidate) return;
     const rendered = renderColorGrade(target.pixels, activeCandidate.aiParams);
-    const nextEvaluation = evaluateImage(target.pixels, rendered, reference?.pixels ?? null, true);
+    const nextEvaluation = evaluateImage(target.pixels, rendered, reference?.pixels ?? null, true, sceneCategory);
     const nextCandidate: Candidate = {
       ...activeCandidate,
       params: activeCandidate.aiParams,
@@ -478,7 +479,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     };
     setCandidates((current) => current.map((candidate) => (candidate.id === activeCandidate.id ? nextCandidate : candidate)));
     setEvaluation(nextEvaluation);
-  }, [activeCandidate, reference, target]);
+  }, [activeCandidate, reference, sceneCategory, target]);
 
   const download = useCallback(() => {
     if (!activeCandidate) return;

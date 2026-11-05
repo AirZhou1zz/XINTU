@@ -3,6 +3,7 @@ import { buildCandidateVariants } from "@/lib/agent/candidates";
 import { MockProvider } from "@/lib/ai/mock-provider";
 import { OpenAICompatibleProvider } from "@/lib/ai/openai-compatible";
 import { getProvider } from "@/lib/ai/provider";
+import { reconcileScenePlan } from "@/lib/agent/scene";
 import { colorParamsSchema } from "@/lib/color/schema";
 
 const testParams = {
@@ -126,6 +127,81 @@ describe("mock provider and candidates", () => {
     });
     expect(output.plan.sceneCategory).toBe("ocean");
     expect(output.plan.directions.map((item) => item.label)).toContain("清透水色");
+  });
+  it("keeps a landscape out of portrait directions even when warm terrain resembles skin", async () => {
+    const provider = new MockProvider();
+    const output = await provider.analyze({
+      prompt: "自然、通透，保留真实质感与画面层次",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: {
+        averageLuma: 0.386,
+        clippingRatio: 0.144,
+        skinRatio: 0.091,
+        centralSkinRatio: 0.047,
+        skyRatio: 0.105,
+        natureRatio: 0.094,
+        waterRatio: 0.079,
+        aspectRatio: 0.8,
+        temperatureBias: 0,
+      },
+    });
+    expect(output.plan.sceneCategory).not.toBe("portrait");
+    expect(output.plan.directions.map((item) => `${item.label} ${item.description}`).join(" ")).not.toMatch(/肤色|皮肤|肤质/);
+  });
+
+  it("keeps a centered portrait classified as portrait", async () => {
+    const provider = new MockProvider();
+    const output = await provider.analyze({
+      prompt: "自然、通透，保留真实质感与画面层次",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: {
+        averageLuma: 0.474,
+        clippingRatio: 0.107,
+        skinRatio: 0.102,
+        centralSkinRatio: 0.061,
+        skyRatio: 0.107,
+        natureRatio: 0.136,
+        waterRatio: 0.127,
+        aspectRatio: 0.714,
+        temperatureBias: 0,
+      },
+    });
+    expect(output.plan.sceneCategory).toBe("portrait");
+  });
+
+  it("guards against portrait directions returned by a vision model for a landscape", async () => {
+    const provider = new MockProvider();
+    const portraitOutput = await provider.analyze({
+      prompt: "帮我修得高级一点",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: {
+        averageLuma: 0.47,
+        clippingRatio: 0.02,
+        skinRatio: 0.18,
+        centralSkinRatio: 0.09,
+        skyRatio: 0.01,
+        natureRatio: 0.03,
+        waterRatio: 0,
+        aspectRatio: 0.75,
+        temperatureBias: 0.02,
+      },
+    });
+    const guarded = reconcileScenePlan(portraitOutput.plan, {
+      averageLuma: 0.386,
+      clippingRatio: 0.144,
+      skinRatio: 0.091,
+      centralSkinRatio: 0.047,
+      skyRatio: 0.105,
+      natureRatio: 0.094,
+      waterRatio: 0.079,
+      aspectRatio: 0.8,
+      temperatureBias: 0,
+    }, "自然、通透，保留真实质感与画面层次");
+    expect(guarded.sceneCategory).not.toBe("portrait");
+    expect(guarded.directions.map((item) => `${item.label} ${item.description}`).join(" ")).not.toMatch(/肤色|皮肤|肤质/);
   });
   it("returns a bounded local visual review", async () => {
     const provider = new MockProvider();

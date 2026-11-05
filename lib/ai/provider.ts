@@ -1,4 +1,5 @@
 import type { AgentPlan, ColorParams, SceneHints, Strength } from "@/lib/color/types";
+import { reconcileScenePlan } from "@/lib/agent/scene";
 import { MockProvider } from "./mock-provider";
 import { hasLiveProviderCredentials, OpenAICompatibleProvider } from "./openai-compatible";
 import type { ReviewInput, VisualReview } from "@/lib/agent/visual-review";
@@ -49,13 +50,22 @@ export function getProvider(): ColorProvider {
   return new MockProvider();
 }
 
+function applySceneGuard(result: AnalyzeOutput, input: AnalyzeInput): AnalyzeOutput {
+  return {
+    ...result,
+    plan: reconcileScenePlan(result.plan, input.sceneHints, input.prompt),
+  };
+}
+
 export async function analyzeWithFallback(input: AnalyzeInput): Promise<AnalyzeOutput> {
-  if (input.forceMock) return new MockProvider().analyze(input);
+  if (input.forceMock) {
+    return applySceneGuard(await new MockProvider().analyze(input), input);
+  }
   try {
-    return await getProvider().analyze(input);
+    return applySceneGuard(await getProvider().analyze(input), input);
   } catch (error) {
     console.warn("Live provider failed, falling back to mock:", error instanceof Error ? error.message : "unknown");
-    return new MockProvider().analyze(input);
+    return applySceneGuard(await new MockProvider().analyze(input), input);
   }
 }
 

@@ -17,7 +17,7 @@ type Screen = "landing" | "upload" | "processing" | "results" | "export" | "erro
 type Preset = "custom" | "portrait" | "landscape" | "film";
 
 const prompts: Record<Preset, string> = {
-  custom: "日系、通透，肤色自然，保留皮肤纹理",
+  custom: "自然、通透，保留真实质感与画面层次",
   portrait: "自然人像，肤色干净但有质感，高光柔和不溢出，保留皮肤纹理",
   landscape: "清透风景，天空层次丰富，远山有空气感，冷暖平衡且保留结构",
   film: "电影胶片感，暖黑阴影，低饱和高光，轻微颗粒，颜色克制但有记忆点",
@@ -231,8 +231,10 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
     setNodeText(root, "9_1492", `${candidate.id} / ${candidate.label.toUpperCase()}`);
     setNodeText(root, "9_1526", `${candidate.id} / ${candidate.label}`);
     setNodeText(root, "9_1528", candidate.evaluation.pass ? "PASS" : "DEGRADED");
+    const portraitScene = studio.plan?.sceneCategory === "portrait";
     setNodeText(root, "9_1532", candidate.evaluation.deltaE === null ? "—" : candidate.evaluation.deltaE.toFixed(1));
-    setNodeText(root, "9_1535", candidate.evaluation.skinShift.toFixed(1));
+    setNodeText(root, "9_1534", portraitScene ? "肤色偏移" : "剪切比例");
+    setNodeText(root, "9_1535", portraitScene ? candidate.evaluation.skinShift.toFixed(1) : `${(candidate.evaluation.clippingRatio * 100).toFixed(1)}%`);
     setNodeText(root, "9_1538", `${(candidate.evaluation.structureScore * 100).toFixed(1)}%`);
     setNodeText(root, "9_1546", formatSigned(candidate.params.exposure));
     setNodeText(root, "9_1552", formatSigned(candidate.params.contrast));
@@ -258,7 +260,7 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
       const candidateId = id === "9_1506" ? "A" : id === "9_1512" ? "B" : "C";
       node.dataset.active = String(studio.activeCandidateId === candidateId);
     });
-  }, [screen, studio.activeCandidate, studio.activeCandidateId, studio.candidates, studio.prompt]);
+  }, [screen, studio.activeCandidate, studio.activeCandidateId, studio.candidates, studio.plan?.sceneCategory, studio.prompt]);
 
   useEffect(() => {
     const root = stageRef.current;
@@ -272,10 +274,12 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
       if (thumbId) setNodeImage(root, thumbId, item.imageUrl, "linear-gradient(180deg, rgba(5,5,5,0.03), rgba(5,5,5,0.2))");
     });
     setNodeText(root, "9_1666", `${candidate.id} / ${candidate.label.toUpperCase()}`);
+    const portraitScene = studio.plan?.sceneCategory === "portrait";
     setNodeText(root, "9_1686", candidate.evaluation.deltaE === null ? "—" : candidate.evaluation.deltaE.toFixed(1));
-    setNodeText(root, "9_1689", candidate.evaluation.skinShift.toFixed(1));
+    setNodeText(root, "9_1688", portraitScene ? "肤色偏移" : "剪切比例");
+    setNodeText(root, "9_1689", portraitScene ? candidate.evaluation.skinShift.toFixed(1) : `${(candidate.evaluation.clippingRatio * 100).toFixed(1)}%`);
     setNodeText(root, "9_1692", `${(candidate.evaluation.structureScore * 100).toFixed(1)}%`);
-  }, [isMobile, screen, studio.activeCandidate, studio.candidates]);
+  }, [isMobile, screen, studio.activeCandidate, studio.candidates, studio.plan?.sceneCategory]);
 
   useEffect(() => {
     const root = stageRef.current;
@@ -290,8 +294,10 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
     setNodeText(root, "9_1752", `${studio.prompt.length} / 500`);
     setNodeText(root, "9_1797", `${candidate.id} / ${candidate.label}`);
     setNodeText(root, "9_1799", candidate.evaluation.pass ? "PASS" : "DEGRADED");
+    const portraitScene = studio.plan?.sceneCategory === "portrait";
     setNodeText(root, "9_1803", candidate.evaluation.deltaE === null ? "—" : candidate.evaluation.deltaE.toFixed(1));
-    setNodeText(root, "9_1806", candidate.evaluation.skinShift.toFixed(1));
+    setNodeText(root, "9_1805", portraitScene ? "肤色偏移" : "剪切比例");
+    setNodeText(root, "9_1806", portraitScene ? candidate.evaluation.skinShift.toFixed(1) : `${(candidate.evaluation.clippingRatio * 100).toFixed(1)}%`);
     setNodeText(root, "9_1809", `${(candidate.evaluation.structureScore * 100).toFixed(1)}%`);
     studio.candidates.forEach((item, index) => {
       const ids = [
@@ -306,7 +312,7 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
       setNodeText(root, ids[2], `${delta} · 结构 ${(item.evaluation.structureScore * 100).toFixed(1)}%`);
     });
     setNodeText(root, "9_1865", `xintu-color-grade.png · ${candidate.pixels.width} × ${candidate.pixels.height}`);
-  }, [screen, studio.activeCandidate, studio.candidates, studio.prompt]);
+  }, [screen, studio.activeCandidate, studio.candidates, studio.plan?.sceneCategory, studio.prompt]);
 
   useEffect(() => {
     const root = stageRef.current;
@@ -500,7 +506,7 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
   };
 
   return (
-    <div className="xintu-product" data-preset={activePreset}>
+    <div className="xintu-product" data-preset={activePreset} data-screen={screen}>
       <input
         ref={fileInputRef}
         className="xintu-hidden-input"
@@ -633,6 +639,7 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
           busy={studio.isBusy || studio.isReviewing}
           visualReview={studio.visualReview}
           isReviewing={studio.isReviewing}
+          sceneCategory={studio.plan?.sceneCategory ?? "other"}
           subjectiveScore={subjectiveScore}
           onSubjectiveScore={setSubjectiveScore}
           onChange={studio.updateParam}

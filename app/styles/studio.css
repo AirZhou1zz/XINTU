@@ -2104,7 +2104,7 @@
   bottom: 18px;
   display: flex;
   flex-direction: column;
-  width: min(440px, calc(100vw - 36px));
+  width: min(var(--xintu-parameter-width, 400px), calc(100vw - 36px));
   overflow: hidden;
   color: #173b34;
   background:
@@ -2736,4 +2736,59 @@
     padding: 9px 13px;
   }
   .xintu-generate-fab small { display: none; }
+}
+
+/* Results workspace: reserve a real column for live controls instead of overlaying the canvas. */
+.xintu-product {
+  --xintu-parameter-width: 400px;
+  --xintu-parameter-gap: 30px;
+}
+
+.xintu-product[data-screen="results"] .xintu-viewport {
+  right: calc(var(--xintu-parameter-width) + var(--xintu-parameter-gap));
+}
+
+.xintu-product[data-screen="results"] .xintu-provider-status {
+  right: calc(var(--xintu-parameter-width) + var(--xintu-parameter-gap));
+}
+
+@media (min-width: 761px) and (max-width: 1120px) {
+  .xintu-product {
+    --xintu-parameter-height: min(50dvh, 460px);
+  }
+
+  .xintu-parameter-panel {
+    top: auto;
+    right: 18px;
+    bottom: 18px;
+    left: 18px;
+    width: auto;
+    height: var(--xintu-parameter-height);
+    max-height: var(--xintu-parameter-height);
+    border-radius: 20px;
+  }
+
+  .xintu-product[data-screen="results"] .xintu-viewport {
+    right: 0;
+    bottom: calc(var(--xintu-parameter-height) + 36px);
+  }
+
+  .xintu-product[data-screen="results"] .xintu-provider-status {
+    right: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .xintu-product {
+    --xintu-parameter-height: 58dvh;
+  }
+
+  .xintu-product[data-screen="results"] .xintu-viewport {
+    right: 0;
+    bottom: calc(var(--xintu-parameter-height) + 16px);
+  }
+
+  .xintu-product[data-screen="results"] .xintu-provider-status {
+    right: 10px;
+  }
 }

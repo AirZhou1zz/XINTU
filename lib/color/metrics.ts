@@ -1,4 +1,4 @@
-import type { EvaluationResult, RgbaImage, SceneHints } from "./types";
+import type { EvaluationResult, RgbaImage, SceneCategory, SceneHints } from "./types";
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const lumaOf = (r: number, g: number, b: number) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
@@ -88,6 +88,7 @@ export function evaluateImage(
   result: RgbaImage,
   reference: RgbaImage | null,
   schemaValid = true,
+  sceneCategory: SceneCategory = "other",
 ): EvaluationResult {
   const originalData = original.data;
   const resultData = result.data;
@@ -152,14 +153,14 @@ export function evaluateImage(
   const covariance = lumaProduct / Math.max(1, sampled) - mean0 * mean1;
   const denominator = Math.sqrt(Math.max(0, variance0) * Math.max(0, variance1));
   const structureScore = clamp01(denominator > 1e-8 ? covariance / denominator : mean0 === mean1 ? 1 : 0);
-  const skinShift = (skinDelta / Math.max(1, skinCount)) / 2.55;
+  const skinShift = sceneCategory === "portrait" ? (skinDelta / Math.max(1, skinCount)) / 2.55 : 0;
   const skyShift = (skyDelta / Math.max(1, skyCount)) / 2.55;
   const clippingRatio = clipped / Math.max(1, sampled);
   const deltaE = deltaECount > 0 ? deltaESum / deltaECount : null;
   const findings: string[] = [];
 
   if (!schemaValid) findings.push("参数 schema 未通过，已触发安全降级。");
-  if (skinShift > 18) findings.push("肤色区域偏移偏大，需要降低橙色饱和度和暖色偏移。");
+  if (sceneCategory === "portrait" && skinShift > 18) findings.push("肤色区域偏移偏大，需要降低橙色饱和度和暖色偏移。");
   if (skyShift > 18) findings.push("天空区域偏移偏大，需要收敛蓝色通道和色温。");
   if (clippingRatio > 0.08) findings.push("高光或阴影剪切偏多，需要降低曝光和对比。");
   if (structureScore < 0.82) findings.push("结构保持不足，需要降低清晰度和强对比调整。");
@@ -184,6 +185,7 @@ export function getSceneHints(image: RgbaImage): SceneHints {
   let clipped = 0;
   let sampled = 0;
   let skin = 0;
+  let centralSkin = 0;
   let sky = 0;
   let nature = 0;
   let water = 0;
@@ -191,13 +193,20 @@ export function getSceneHints(image: RgbaImage): SceneHints {
 
   for (let index = 0; index < image.data.length; index += 16) {
     const pixel = index / 4;
+    const x = pixel % image.width;
     const y = Math.floor(pixel / image.width);
     const r = image.data[index];
     const g = image.data[index + 1];
     const b = image.data[index + 2];
+    const skinPixel = isSkin(r, g, b);
     luma += lumaOf(r, g, b);
     if (r <= 2 || g <= 2 || b <= 2 || r >= 253 || g >= 253 || b >= 253) clipped += 1;
-    if (isSkin(r, g, b)) skin += 1;
+    if (skinPixel) {
+      skin += 1;
+      if (x >= image.width * 0.2 && x <= image.width * 0.8 && y >= image.height * 0.12 && y <= image.height * 0.88) {
+        centralSkin += 1;
+      }
+    }
     if (y < image.height * 0.55 && isSky(r, g, b)) sky += 1;
     if (g > 62 && g > r * 1.06 && g > b * 1.01) nature += 1;
     if (b > 70 && b > r * 1.1 && b > g * 1.025) water += 1;
@@ -210,6 +219,7 @@ export function getSceneHints(image: RgbaImage): SceneHints {
     averageLuma: luma / total,
     clippingRatio: clipped / total,
     skinRatio: skin / total,
+    centralSkinRatio: centralSkin / total,
     skyRatio: sky / total,
     natureRatio: nature / total,
     waterRatio: water / total,
