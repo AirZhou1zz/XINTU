@@ -23,7 +23,7 @@
   <a href="#how-it-works">Read the workflow</a>
 </p>
 
-> The public demo is deliberately deterministic and uses a local mock planner. It costs nothing to try and makes no model API calls. Real Qwen 3.8 output is shown in the screenshots below.
+> The production demo uses project-configured Qwen 3.8 Flash when available and safely falls back to the local mock planner. Rendering remains deterministic and runs locally.
 
 ## Recruiter portfolio
 
@@ -51,7 +51,7 @@ This makes the project useful as both a small photo-editing product and a refere
 5. Render three scene-aware candidates locally with Canvas 2D.
 6. Evaluate skin, sky, structure, clipping, and color distance.
 7. Refine up to two rounds when the result misses its target.
-8. Compare, fine-tune 13 parameters, ask for optional visual review, record a subjective score, continue with natural-language feedback, and export a PNG.
+8. Compare, fine-tune 13 parameters, receive automatic visual review, record a subjective score, continue with natural-language feedback, and export a PNG.
 
 ![XINTU demo](docs/public-demo.png)
 
@@ -59,11 +59,11 @@ This makes the project useful as both a small photo-editing product and a refere
 
 | Mode | Model | API cost | Purpose |
 | --- | --- | --- | --- |
-| Public demo | Local mock planner | Zero | Anyone can explore the full interaction |
-| Local live mode | Qwen 3.8 Flash via DashScope | Your own key | Real image analysis and planning |
+| Public demo | Qwen 3.8 Flash when configured; local fallback | Uses project quota when live | Real scene analysis with a safe fallback |
+| Local live mode | Qwen 3.8 Flash via DashScope | Your own key | Real image analysis and planning on your machine |
 | Deterministic render | Browser Canvas | Zero | Inspectable and repeatable output |
 
-The public demo intentionally does not expose the owner's API key or bill the owner's account.
+The API key is never exposed to the browser. When the live model is enabled, public usage consumes the project owner's configured model quota.
 
 ## How it works
 

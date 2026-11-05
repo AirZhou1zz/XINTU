@@ -8,7 +8,7 @@
 
 **Primary action:** open the public demo and try one before/after workflow.
 
-**Proof:** real Qwen 3.8 samples, bounded agent trace, deterministic Canvas rendering, and a zero-cost public mock demo.
+**Proof:** real Qwen 3.8 samples, bounded agent trace, deterministic Canvas rendering, and a safe local fallback demo.
 
 ## Four-week launch sequence
 
@@ -64,7 +64,7 @@ Publish a write-up about bounded image agents, including one failure case. Colle
 
 现在上传原图 + 参考图，可以生成 3 个候选，拖动对比并导出 PNG。
 
-公开 Demo 是本地确定性模式，不需要 API Key，也不会消耗模型额度。
+公开 Demo 优先使用项目配置的 Qwen 3.8 Flash，模型不可用时回退到本地确定性模式。在线调用会消耗项目配置的模型额度。
 欢迎拿真实照片来测，尤其想收集人像、逆光和夜景的失败案例。
 
 #AI产品经理 #AIGC #修图 #独立开发 #GitHub
@@ -97,7 +97,7 @@ Publish a write-up about bounded image agents, including one failure case. Colle
 
 和常见的 AI 生图/修图不同，模型只输出调色计划和结构化参数，不直接生成结果像素。Canvas 在浏览器里完成确定性渲染，然后评估肤色、天空、结构保持和色差，失败时最多修正两轮。
 
-技术栈是 Next.js 16 + React 19 + TypeScript + Canvas 2D，模型侧可接 Qwen 3.8 Flash，不配置 Key 时自动使用本地 Mock。
+技术栈是 Next.js 16 + React 19 + TypeScript + Canvas 2D，模型侧接入 Qwen 3.8 Flash，模型不可用时自动使用本地 Mock。
 
 公开 Demo 不调用模型，避免 API 费用。想听听大家对“有界 Agent + 确定性工具执行”这种设计的看法，也欢迎拍砖。
 ```
@@ -119,7 +119,7 @@ The model does not generate the final image. It analyzes the target and referenc
 
 Rendering is deterministic and happens locally with Canvas 2D. The project is intentionally non-generative: it should preserve identity, geometry, and scene content.
 
-The public demo uses a local mock planner so it costs nothing to try. Real Qwen 3.8 output is included in the repository screenshots.
+The public demo uses project-configured Qwen 3.8 Flash when available and falls back to the local mock planner on failure. Live requests consume the configured project model quota.
 
 I would especially appreciate feedback on:
 - whether reference-based grading is more useful than prompt-only editing
@@ -149,7 +149,7 @@ The interesting product question was not whether a model could make a photo look
 
 The model interprets the target and reference, plans grading operations, emits schema-validated parameters, and evaluates the output. Canvas handles rendering locally. The workflow is limited to four tools and two refinement rounds.
 
-Public demo uses a deterministic mock planner so anyone can try it without an API bill. Real Qwen 3.8 samples are available in the repository.
+The public demo uses the configured Qwen 3.8 model with a deterministic mock fallback. Live requests consume the project quota.
 
 I am looking for feedback from product builders working on agents, deterministic tools, and human-in-the-loop creative workflows.
 ```
