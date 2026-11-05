@@ -2745,3 +2745,57 @@
   .xintu-visual-review-head button { min-height: 36px; }
   .xintu-rating-stars button { width: 31px; height: 31px; }
 }
+
+/* Persistent upload/action entry */
+.xintu-generate-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 24px;
+  z-index: 72;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 14px;
+  color: rgba(250, 244, 233, 0.76);
+  background: rgba(28, 54, 46, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  box-shadow: 0 16px 38px rgba(6, 24, 18, 0.34);
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(18px);
+}
+
+.xintu-generate-fab[data-ready="true"] {
+  color: #173b34;
+  background: #eadff0;
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+.xintu-generate-fab small {
+  padding-left: 7px;
+  color: inherit;
+  opacity: 0.6;
+  font-family: var(--lab-font-mono);
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  border-left: 1px solid currentColor;
+}
+
+.xintu-generate-fab:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.xintu-generate-fab:disabled { opacity: 0.45; }
+
+@media (max-width: 760px) {
+  .xintu-generate-fab {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    min-height: 46px;
+    padding: 9px 13px;
+  }
+  .xintu-generate-fab small { display: none; }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowLeftRight, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, SlidersHorizontal, Sparkles } from "lucide-react";
 import { ManualParameterPanel } from "./manual-parameter-panel";
 import { useStudio } from "@/components/studio/use-studio";
 import Frame91309 from "./frames/Frame91309";
@@ -544,7 +544,22 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
         </div>
       ) : null}
       {notice ? <div className="xintu-notice" role="status">{notice}</div> : null}
-      {screen === "results" && studio.activeCandidate ? (
+      {screen === "upload" ? (
+        <button
+          type="button"
+          className="xintu-generate-fab"
+          data-ready={Boolean(studio.target && studio.prompt.trim())}
+          onClick={() => {
+            if (studio.target) return void startAnalysis();
+            fileInputRef.current?.click();
+          }}
+          disabled={studio.isBusy}
+        >
+          <Sparkles size={16} />
+          <span>{studio.target ? "生成 3 个候选" : "先上传照片"}</span>
+          <small>{studio.target ? "AI PLAN" : "JPG / PNG / WEBP"}</small>
+        </button>
+      ) : null}      {screen === "results" && studio.activeCandidate ? (
         <button
           type="button"
           className="xintu-tune-trigger"
