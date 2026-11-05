@@ -244,8 +244,8 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
 
     try {
       const sceneHints = getSceneHints(activeTarget.pixels);
-      const imageDataUrl = rgbaToJpegDataUrl(activeTarget.pixels);
-      const referenceDataUrl = reference ? rgbaToJpegDataUrl(reference.pixels) : undefined;
+      const imageDataUrl = rgbaToJpegDataUrl(activeTarget.pixels, 900);
+      const referenceDataUrl = reference ? rgbaToJpegDataUrl(reference.pixels, 900) : undefined;
       const analyzeResponse = await fetch("/api/agent/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -458,8 +458,8 @@ export function useStudio(initialPrompt = "自然、通透，保留真实质感�
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: prompt.trim(),
-          imageDataUrl: rgbaToJpegDataUrl(activeCandidate.pixels),
-          referenceDataUrl: reference ? rgbaToJpegDataUrl(reference.pixels) : undefined,
+          imageDataUrl: rgbaToJpegDataUrl(activeCandidate.pixels, 900),
+          referenceDataUrl: reference ? rgbaToJpegDataUrl(reference.pixels, 900) : undefined,
           heuristics: {
             pass: activeCandidate.evaluation.pass,
             deltaE: activeCandidate.evaluation.deltaE,

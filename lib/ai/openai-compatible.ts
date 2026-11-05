@@ -72,7 +72,7 @@ function providerErrorMessage(body: string) {
 
 async function requestJson(messages: ChatMessage[]) {
   const { token, baseUrl, model } = getProviderConfig();
-  const timeoutMs = Number(process.env.AI_TIMEOUT_MS || 45000);
+  const timeoutMs = Number(process.env.AI_TIMEOUT_MS || 55000);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -86,7 +86,7 @@ async function requestJson(messages: ChatMessage[]) {
       body: JSON.stringify({
         model,
         temperature: 0.2,
-        max_tokens: 2048,
+        max_tokens: 1200,
         response_format: { type: "json_object" },
         messages,
       }),

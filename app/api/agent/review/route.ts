@@ -3,6 +3,7 @@ import { reviewRequestSchema, visualReviewSchema } from "@/lib/agent/visual-revi
 import { reviewWithFallback } from "@/lib/ai/provider";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const maxBytes = Number(process.env.MAX_IMAGE_MB || 15) * 1024 * 1024;

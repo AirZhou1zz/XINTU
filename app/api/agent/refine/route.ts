@@ -1,9 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { refineRequestSchema } from "@/lib/agent/schema";
 import { refineWithFallback } from "@/lib/ai/provider";
 import { refineResponseSchema } from "@/lib/color/schema";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {

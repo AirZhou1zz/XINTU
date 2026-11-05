@@ -1,9 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { analyzeRequestSchema } from "@/lib/agent/schema";
 import { analyzeWithFallback } from "@/lib/ai/provider";
 import { analyzeResponseSchema } from "@/lib/color/schema";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const maxBytes = Number(process.env.MAX_IMAGE_MB || 15) * 1024 * 1024;
