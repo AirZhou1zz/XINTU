@@ -86,6 +86,12 @@ export function detectScene(hints: SceneHints | undefined, prompt: string) {
     return { category, confidence: category === "other" ? 0.4 : 0.62 };
   }
 
+  const centralSkinRatio = hints.centralSkinRatio ?? hints.skinRatio * 0.5;
+  const skinCenterShare = centralSkinRatio / Math.max(0.001, hints.skinRatio);
+  const portraitEvidence =
+    hints.skinRatio >= 0.09
+    && centralSkinRatio >= 0.055
+    && skinCenterShare >= 0.45;
   if (explicitCity && !explicitPortrait) {
     return { category: "city" as const, confidence: 0.86 };
   }
@@ -103,14 +109,6 @@ export function detectScene(hints: SceneHints | undefined, prompt: string) {
     }
     return { category: "landscape" as const, confidence: 0.76 };
   }
-
-  const centralSkinRatio = hints.centralSkinRatio ?? hints.skinRatio * 0.5;
-  const skinCenterShare = centralSkinRatio / Math.max(0.001, hints.skinRatio);
-  const portraitEvidence =
-    hints.skinRatio >= 0.09
-    && centralSkinRatio >= 0.055
-    && skinCenterShare >= 0.45;
-
   if (portraitEvidence) {
     return {
       category: "portrait" as const,
