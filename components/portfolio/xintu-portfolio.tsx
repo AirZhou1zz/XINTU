@@ -401,7 +401,7 @@ export function XintuPortfolio() {
             <article>
               <CircleGauge size={21} strokeWidth={1.5} />
               <h3>当前指标仍是近似</h3>
-              <p>ΔE 使用 CIE76 近似，肤色与天空依赖启发式蒙版，不替代专业色彩科学。</p>
+              <p>ΔE 使用样本级 CIEDE2000；肤色与天空仍依赖启发式蒙版，不替代专业色彩科学。</p>
             </article>
             <article>
               <TestTube2 size={21} strokeWidth={1.5} />

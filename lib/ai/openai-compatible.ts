@@ -1,6 +1,8 @@
 import { analyzeResponseSchema, colorParamsSchema, refineResponseSchema } from "@/lib/color/schema";
+import { visualReviewSchema } from "@/lib/agent/visual-review";
+import type { ReviewInput, VisualReview } from "@/lib/agent/visual-review";
 import type { AnalyzeInput, AnalyzeOutput, ColorProvider, RefineInput, RefineOutput } from "./provider";
-import { SYSTEM_PROMPT, buildAnalyzePrompt, buildRefinePrompt } from "./prompt";
+import { REVIEW_SYSTEM_PROMPT, SYSTEM_PROMPT, buildAnalyzePrompt, buildRefinePrompt, buildReviewPrompt } from "./prompt";
 
 type ChatMessage = {
   role: "system" | "user";
@@ -132,4 +134,18 @@ export class OpenAICompatibleProvider implements ColorProvider {
       provider: this.name,
     });
   }
-}
+  async review(input: ReviewInput): Promise<VisualReview> {
+    const content: ChatMessage["content"] = [
+      { type: "text", text: buildReviewPrompt(input.prompt, input.heuristics) },
+      { type: "image_url", image_url: { url: input.imageDataUrl } },
+    ];
+    if (input.referenceDataUrl) {
+      content.push({ type: "text", text: "Reference image follows." });
+      content.push({ type: "image_url", image_url: { url: input.referenceDataUrl } });
+    }
+    const raw = await requestJson([
+      { role: "system", content: REVIEW_SYSTEM_PROMPT },
+      { role: "user", content },
+    ]);
+    return visualReviewSchema.parse({ ...(raw as Record<string, unknown>), provider: this.name });
+  }}

@@ -1,4 +1,4 @@
-﻿
+
 export const TOOL_IDS = [
   "global_grade",
   "skin_protect",
@@ -45,9 +45,46 @@ export const COLOR_PARAM_KEYS: Array<keyof ColorParams> = [
   "skyTemperature",
 ];
 
+export type SceneCategory =
+  | "portrait"
+  | "landscape"
+  | "ocean"
+  | "mountain"
+  | "night"
+  | "city"
+  | "still_life"
+  | "other";
+
+export type CandidateStyle =
+  | "natural"
+  | "warm_film"
+  | "airy"
+  | "cinematic"
+  | "vivid"
+  | "soft";
+
+export type SceneHints = {
+  averageLuma: number;
+  clippingRatio: number;
+  skinRatio: number;
+  skyRatio: number;
+  natureRatio: number;
+  waterRatio: number;
+  aspectRatio: number;
+};
+
+export type CandidateDirection = {
+  id: "A" | "B" | "C";
+  label: string;
+  description: string;
+  style: CandidateStyle;
+};
 export type AgentPlan = {
   intent: string;
   sceneSummary: string;
+  sceneCategory: SceneCategory;
+  sceneConfidence: number;
+  directions: CandidateDirection[];
   tools: ToolId[];
   constraints: string[];
 };

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildCandidateVariants } from "@/lib/agent/candidates";
 import { runBoundedAgent } from "@/lib/agent/loop";
+import { sceneLabels } from "@/lib/agent/scene";
+import { visualReviewSchema } from "@/lib/agent/visual-review";
+import type { VisualReview } from "@/lib/agent/visual-review";
 import type { AnalyzeResponse } from "@/lib/agent/types";
 import { analyzeResponseSchema, refineResponseSchema } from "@/lib/color/schema";
 import { evaluateImage, getSceneHints } from "@/lib/color/metrics";
@@ -72,6 +75,8 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
   const [manualRefinements, setManualRefinements] = useState(0);
   const [conversation, setConversation] = useState<StudioConversationMessage[]>([]);
+  const [visualReview, setVisualReview] = useState<VisualReview | null>(null);
+  const [isReviewing, setIsReviewing] = useState(false);
   const renderTimerRef = useRef<number | null>(null);
 
   const activeCandidate = useMemo(
@@ -157,6 +162,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
   const updateParam = useCallback((key: keyof ColorParams, value: number) => {
     if (!target || !activeCandidate) return;
     const params = { ...activeCandidate.params, [key]: value };
+    setVisualReview(null);
     const candidateId = activeCandidate.id;
     setCandidates((current) => current.map((candidate) => (candidate.id === candidateId ? { ...candidate, params } : candidate)));
 
@@ -226,7 +232,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
         setTraceStep(
           setTraceStep(current, "plan", {
             status: "passed",
-            detail: `选择工具：${analyzed.plan.tools.join(" · ")}`,
+            detail: `识别为${sceneLabels[analyzed.plan.sceneCategory]} · 方向：${analyzed.plan.directions.map((item) => item.label).join(" / ")}`,
           }),
           "apply",
           { status: "running", detail: "正在生成候选调色参数。" },
@@ -294,7 +300,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       const currentParams = loop.params;
 
       setStatus("rendering");
-      const variants = buildCandidateVariants(currentParams);
+      const variants = buildCandidateVariants(currentParams, analyzed.plan.directions);
       const renderedCandidates = variants.map((variant) => {
         const pixels = renderColorGrade(activeTarget.pixels, variant.params);
         const candidateEvaluation = evaluateImage(activeTarget.pixels, pixels, reference?.pixels ?? null, true);
@@ -324,7 +330,10 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
         ),
       );
       setElapsedMs(Math.round(performance.now() - startedAt));
-      setConversation([{ role: "assistant", text: "已生成 3 个候选。满意可以直接导出，也可以继续告诉我哪里需要调整。" }]);
+      setConversation([{
+        role: "assistant",
+        text: `识别为${sceneLabels[analyzed.plan.sceneCategory]}场景，已自动准备 ${analyzed.plan.directions.map((item) => item.label).join(" / ")} 三个方向。满意可以直接导出，也可以继续告诉我哪里需要调整。`,
+      }]);
       setStatus("done");
       return true;
     } catch (analyzeError) {
@@ -397,6 +406,48 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       return false;
     }
   }, [activeCandidate, manualRefinements, prompt, reference, strength, target]);
+  const reviewCurrentCandidate = useCallback(async () => {
+    if (!target || !activeCandidate || isReviewing) return false;
+    setIsReviewing(true);
+    try {
+      const response = await fetch("/api/agent/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          imageDataUrl: rgbaToJpegDataUrl(activeCandidate.pixels),
+          referenceDataUrl: reference ? rgbaToJpegDataUrl(reference.pixels) : undefined,
+          heuristics: {
+            pass: activeCandidate.evaluation.pass,
+            deltaE: activeCandidate.evaluation.deltaE,
+            skinShift: activeCandidate.evaluation.skinShift,
+            skyShift: activeCandidate.evaluation.skyShift,
+            structureScore: activeCandidate.evaluation.structureScore,
+            clippingRatio: activeCandidate.evaluation.clippingRatio,
+            schemaValid: activeCandidate.evaluation.schemaValid,
+            findings: activeCandidate.evaluation.findings,
+          },
+        }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error || "视觉复核失败。");
+      }
+      const nextReview = visualReviewSchema.parse(await response.json());
+      setVisualReview(nextReview);
+      setConversation((current) => [...current, {
+        role: "assistant",
+        text: `视觉复核：${nextReview.summary}`,
+      }]);
+      return true;
+    } catch (reviewError) {
+      const message = reviewError instanceof Error ? reviewError.message : "视觉复核失败。";
+      setConversation((current) => [...current, { role: "assistant", text: `视觉复核失败：${message}` }]);
+      return false;
+    } finally {
+      setIsReviewing(false);
+    }
+  }, [activeCandidate, isReviewing, prompt, reference, target]);
   const resetActiveParams = useCallback(() => {
     if (!target || !activeCandidate) return;
     const rendered = renderColorGrade(target.pixels, activeCandidate.aiParams);
@@ -438,6 +489,8 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     elapsedMs,
     manualRefinements,
     conversation,
+    visualReview,
+    isReviewing,
     isBusy,
     loadTarget,
     loadReference,
@@ -448,6 +501,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     updateParam,
     resetActiveParams,
     refineFromFeedback,
+    reviewCurrentCandidate,
     download,
     resetResults,
     setError,

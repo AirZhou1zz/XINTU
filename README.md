@@ -45,13 +45,13 @@ This makes the project useful as both a small photo-editing product and a refere
 ## What it does
 
 1. Upload a target photo and an optional reference image.
-2. Describe the desired mood in natural language.
+2. Describe the desired mood in natural language. XINTU detects portrait, landscape, ocean, mountain, night, or city scenes and chooses three relevant directions even when the prompt is vague.
 3. Let the bounded agent choose grading tools and order them.
 4. Generate structured color parameters.
-5. Render three candidates locally with Canvas 2D.
+5. Render three scene-aware candidates locally with Canvas 2D.
 6. Evaluate skin, sky, structure, clipping, and color distance.
 7. Refine up to two rounds when the result misses its target.
-8. Compare, fine-tune, and export a PNG.
+8. Compare, fine-tune 13 parameters, ask for optional visual review, record a subjective score, continue with natural-language feedback, and export a PNG.
 
 ![XINTU demo](docs/public-demo.png)
 
@@ -96,7 +96,7 @@ The model never draws the final image. It only returns a validated plan. Renderi
 
 The current prototype reports lightweight browser-side signals:
 
-- `ΔE Lab`: CIE76 approximation, not full ΔE2000.
+- `ΔE2000`: CIEDE2000 color difference against the optional reference image.
 - Skin-tone shift: heuristic skin mask and average RGB offset.
 - Sky shift: blue-dominant region heuristic.
 - Structure retention: grayscale correlation between source and result.

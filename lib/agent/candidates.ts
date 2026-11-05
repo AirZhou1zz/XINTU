@@ -1,4 +1,4 @@
-﻿import type { ColorParams } from "@/lib/color/types";
+import type { CandidateDirection, CandidateStyle, ColorParams } from "@/lib/color/types";
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -20,23 +20,27 @@ function tune(base: ColorParams, patch: Partial<ColorParams>): ColorParams {
   };
 }
 
-export const buildCandidateVariants = (base: ColorParams) => [
-  {
-    id: "A" as const,
-    label: "自然平衡",
-    description: "优先保护肤色和结构，整体更耐看。",
-    params: tune(base, { saturation: -2, clarity: -1 }),
-  },
-  {
-    id: "B" as const,
-    label: "参考氛围",
-    description: "更贴近参考图的色温与色彩关系。",
-    params: tune(base, { temperature: 4, tint: 2, saturation: 3, contrast: 2 }),
-  },
-  {
-    id: "C" as const,
-    label: "柔光电影",
-    description: "更柔和的高光与更轻的中间调对比。",
-    params: tune(base, { highlights: -4, shadows: 3, clarity: -4, grain: 2, vignette: -2 }),
-  },
+const stylePatches: Record<CandidateStyle, Partial<ColorParams>> = {
+  natural: { saturation: -2, clarity: -1 },
+  warm_film: { temperature: 5, tint: 2, saturation: 2, highlights: -3, grain: 3 },
+  airy: { exposure: 2, contrast: -2, dehaze: 5, clarity: 2, saturation: -1 },
+  cinematic: { contrast: 2, highlights: -5, shadows: 4, clarity: -4, grain: 2, vignette: -2 },
+  vivid: { contrast: 3, saturation: 5, clarity: 2 },
+  soft: { highlights: -4, shadows: 3, clarity: -4, grain: 1 },
+};
+
+const fallbackDirections: CandidateDirection[] = [
+  { id: "A", label: "自然平衡", description: "优先保护肤色和结构，整体更耐看。", style: "natural" },
+  { id: "B", label: "参考氛围", description: "更贴近参考图的色温与色彩关系。", style: "warm_film" },
+  { id: "C", label: "柔光电影", description: "更柔和的高光与更轻的中间调对比。", style: "cinematic" },
 ];
+
+export const buildCandidateVariants = (base: ColorParams, directions: CandidateDirection[] = fallbackDirections) => {
+  const selected = directions.length === 3 ? directions : fallbackDirections;
+  return selected.map((direction) => ({
+    id: direction.id,
+    label: direction.label,
+    description: direction.description,
+    params: tune(base, stylePatches[direction.style]),
+  }));
+};

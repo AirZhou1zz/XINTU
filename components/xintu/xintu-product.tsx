@@ -107,6 +107,7 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [comparePosition, setComparePosition] = useState(52);
   const [parameterPanelOpen, setParameterPanelOpen] = useState(false);
+  const [subjectiveScore, setSubjectiveScore] = useState<number | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -229,6 +230,7 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
 
     setNodeText(root, "9_1447", studio.prompt);
     setNodeText(root, "9_1492", `${candidate.id} / ${candidate.label.toUpperCase()}`);
+    setNodeText(root, "9_1526", `${candidate.id} / ${candidate.label}`);
     setNodeText(root, "9_1528", candidate.evaluation.pass ? "PASS" : "DEGRADED");
     setNodeText(root, "9_1532", candidate.evaluation.deltaE === null ? "—" : candidate.evaluation.deltaE.toFixed(1));
     setNodeText(root, "9_1535", candidate.evaluation.skinShift.toFixed(1));
@@ -614,7 +616,12 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
           elapsedMs={studio.elapsedMs}
           manualRefinements={studio.manualRefinements}
           conversation={studio.conversation}
-          busy={studio.isBusy}
+          busy={studio.isBusy || studio.isReviewing}
+          visualReview={studio.visualReview}
+          isReviewing={studio.isReviewing}
+          subjectiveScore={subjectiveScore}
+          onReview={studio.reviewCurrentCandidate}
+          onSubjectiveScore={setSubjectiveScore}
           onChange={studio.updateParam}
           onReset={studio.resetActiveParams}
           onClose={() => setParameterPanelOpen(false)}

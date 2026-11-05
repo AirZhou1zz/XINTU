@@ -2581,3 +2581,167 @@
   .xintu-feedback-composer button { min-height: 38px; }
   .xintu-feedback-log { max-height: 110px; }
 }
+
+/* Optional visual model review and subjective score */
+.xintu-visual-review {
+  margin: 4px 0 12px;
+  padding: 12px;
+  background: rgba(216, 228, 218, 0.56);
+  border: 1px solid rgba(49, 95, 81, 0.14);
+  border-radius: 12px;
+}
+
+.xintu-visual-review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.xintu-visual-review-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.xintu-visual-review-head span {
+  color: #63766e;
+  font-family: var(--lab-font-mono);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.xintu-visual-review-head strong { font-size: 12px; }
+
+.xintu-visual-review-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 31px;
+  padding: 6px 9px;
+  color: #f8f3e7;
+  background: #315f51;
+  border: 0;
+  border-radius: 5px;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.xintu-visual-review-head button:disabled { opacity: 0.45; }
+
+.xintu-visual-review-empty {
+  margin: 9px 0 0;
+  color: #637a70;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.xintu-visual-review-result {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(49, 95, 81, 0.14);
+}
+
+.xintu-visual-review-score {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.xintu-visual-review-score strong {
+  color: #315f51;
+  font-family: "Bodoni MT", Didot, Georgia, serif;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.xintu-visual-review-score span {
+  color: #61756b;
+  font-family: var(--lab-font-mono);
+  font-size: 7px;
+  letter-spacing: 0.08em;
+}
+
+.xintu-visual-review-result p {
+  margin: 8px 0 0;
+  color: #38564c;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.xintu-visual-review-result ul {
+  margin: 7px 0 0;
+  padding-left: 14px;
+  color: #6a5944;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.xintu-visual-review-result small {
+  display: block;
+  margin-top: 7px;
+  color: #5c4b69;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.xintu-subjective-rating {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px 14px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  background: rgba(252, 248, 239, 0.55);
+  border: 1px solid rgba(23, 59, 52, 0.12);
+  border-radius: 12px;
+}
+
+.xintu-subjective-rating > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.xintu-subjective-rating span {
+  color: #7b8982;
+  font-family: var(--lab-font-mono);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+}
+
+.xintu-subjective-rating strong { font-size: 11px; }
+
+.xintu-rating-stars {
+  display: flex;
+  gap: 3px;
+}
+
+.xintu-rating-stars button {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  color: rgba(82, 61, 98, 0.25);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+}
+
+.xintu-rating-stars button:hover,
+.xintu-rating-stars button.is-active { color: #725287; }
+
+.xintu-subjective-rating > small {
+  grid-column: 1 / -1;
+  color: #7b8982;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .xintu-visual-review-head { align-items: flex-start; }
+  .xintu-visual-review-head button { min-height: 36px; }
+  .xintu-rating-stars button { width: 31px; height: 31px; }
+}

@@ -15,6 +15,11 @@ export const analyzeRequestSchema = z
       .object({
         averageLuma: z.number().min(0).max(1),
         clippingRatio: z.number().min(0).max(1),
+        skinRatio: z.number().min(0).max(1),
+        skyRatio: z.number().min(0).max(1),
+        natureRatio: z.number().min(0).max(1),
+        waterRatio: z.number().min(0).max(1),
+        aspectRatio: z.number().min(0.2).max(5),
       })
       .optional(),
   })

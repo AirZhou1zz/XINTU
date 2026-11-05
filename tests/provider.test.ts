@@ -41,7 +41,15 @@ describe("mock provider and candidates", () => {
       prompt: "日系、通透、天空自然",
       strength: "medium",
       imageDataUrl: "data:image/jpeg;base64,AAAA",
-      sceneHints: { averageLuma: 0.45, clippingRatio: 0.02 },
+      sceneHints: {
+        averageLuma: 0.45,
+        clippingRatio: 0.02,
+        skinRatio: 0.16,
+        skyRatio: 0.03,
+        natureRatio: 0.02,
+        waterRatio: 0,
+        aspectRatio: 0.72,
+      },
     });
     expect(output.provider).toBe("mock");
     expect(output.plan.tools.length).toBeGreaterThan(0);
@@ -74,6 +82,49 @@ describe("mock provider and candidates", () => {
     expect(output.params.temperature).toBeGreaterThan(testParams.temperature);
     expect(output.params.highlights).toBeLessThan(testParams.highlights);
     expect(output.rationale).toContain("根据");
+  });
+  it("selects scene-appropriate directions when the prompt is vague", async () => {
+    const provider = new MockProvider();
+    const output = await provider.analyze({
+      prompt: "帮我修得高级一点",
+      strength: "medium",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      sceneHints: {
+        averageLuma: 0.48,
+        clippingRatio: 0.01,
+        skinRatio: 0.18,
+        skyRatio: 0.01,
+        natureRatio: 0.03,
+        waterRatio: 0,
+        aspectRatio: 0.75,
+      },
+    });
+    expect(output.plan.sceneCategory).toBe("portrait");
+    expect(output.plan.directions).toHaveLength(3);
+    expect(output.plan.directions.map((item) => item.id)).toEqual(["A", "B", "C"]);
+    expect(output.plan.directions[0].label).toContain("肤质");
+  });
+
+  it("returns a bounded local visual review", async () => {
+    const provider = new MockProvider();
+    const review = await provider.review({
+      prompt: "自然一点",
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+      heuristics: {
+        pass: true,
+        deltaE: 3,
+        skinShift: 2,
+        skyShift: 1,
+        structureScore: 0.98,
+        clippingRatio: 0.01,
+        schemaValid: true,
+        findings: [],
+      },
+    });
+    expect(review.provider).toBe("mock");
+    expect(review.score).toBeGreaterThanOrEqual(0);
+    expect(review.score).toBeLessThanOrEqual(100);
+    expect(review.verdict).toBe("pass");
   });
   it("builds three bounded variants", () => {
     const base = testParams;

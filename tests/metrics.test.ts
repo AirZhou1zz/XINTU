@@ -1,5 +1,5 @@
-﻿import { describe, expect, it } from "vitest";
-import { evaluateImage } from "@/lib/color/metrics";
+import { describe, expect, it } from "vitest";
+import { deltaE2000, evaluateImage } from "@/lib/color/metrics";
 import type { RgbaImage } from "@/lib/color/types";
 
 const image = (pixels: number[]): RgbaImage => ({
@@ -29,6 +29,13 @@ describe("image metrics", () => {
     expect(result.deltaE).toBeCloseTo(0, 5);
   });
 
+  it("matches a published CIEDE2000 reference pair", () => {
+    const difference = deltaE2000(
+      { l: 50, a: 2.6772, b: -79.7751 },
+      { l: 50, a: 0, b: -82.7485 },
+    );
+    expect(difference).toBeCloseTo(2.0425, 4);
+  });
   it("detects strong clipping", () => {
     const clipped = image([
       255, 255, 255, 255,

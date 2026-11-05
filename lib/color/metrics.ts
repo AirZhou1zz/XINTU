@@ -1,4 +1,4 @@
-﻿import type { EvaluationResult, RgbaImage } from "./types";
+import type { EvaluationResult, RgbaImage, SceneHints } from "./types";
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const lumaOf = (r: number, g: number, b: number) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
@@ -30,8 +30,57 @@ function rgbToLab(r: number, g: number, b: number) {
   return { l: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
 }
 
-function deltaE76(a: { l: number; a: number; b: number }, b: { l: number; a: number; b: number }) {
-  return Math.sqrt((a.l - b.l) ** 2 + (a.a - b.a) ** 2 + (a.b - b.b) ** 2);
+export function deltaE2000(
+  lab1: { l: number; a: number; b: number },
+  lab2: { l: number; a: number; b: number },
+) {
+  const pow25to7 = 25 ** 7;
+  const c1 = Math.hypot(lab1.a, lab1.b);
+  const c2 = Math.hypot(lab2.a, lab2.b);
+  const cBar = (c1 + c2) / 2;
+  const g = 0.5 * (1 - Math.sqrt(cBar ** 7 / (cBar ** 7 + pow25to7)));
+  const a1p = (1 + g) * lab1.a;
+  const a2p = (1 + g) * lab2.a;
+  const c1p = Math.hypot(a1p, lab1.b);
+  const c2p = Math.hypot(a2p, lab2.b);
+  const h1p = (Math.atan2(lab1.b, a1p) * 180 / Math.PI + 360) % 360;
+  const h2p = (Math.atan2(lab2.b, a2p) * 180 / Math.PI + 360) % 360;
+  const deltaLp = lab2.l - lab1.l;
+  const deltaCp = c2p - c1p;
+  const deltaHp = c1p * c2p === 0
+    ? 0
+    : Math.abs(h2p - h1p) <= 180
+      ? h2p - h1p
+      : h2p <= h1p
+        ? h2p - h1p + 360
+        : h2p - h1p - 360;
+  const deltaHpPrime = 2 * Math.sqrt(c1p * c2p) * Math.sin((deltaHp * Math.PI) / 360);
+  const lBarP = (lab1.l + lab2.l) / 2;
+  const cBarP = (c1p + c2p) / 2;
+  const hBarP = c1p * c2p === 0
+    ? h1p + h2p
+    : Math.abs(h1p - h2p) <= 180
+      ? (h1p + h2p) / 2
+      : h1p + h2p < 360
+        ? (h1p + h2p + 360) / 2
+        : (h1p + h2p - 360) / 2;
+  const t = 1
+    - 0.17 * Math.cos(((hBarP - 30) * Math.PI) / 180)
+    + 0.24 * Math.cos((2 * hBarP * Math.PI) / 180)
+    + 0.32 * Math.cos(((3 * hBarP + 6) * Math.PI) / 180)
+    - 0.20 * Math.cos(((4 * hBarP - 63) * Math.PI) / 180);
+  const deltaTheta = 30 * Math.exp(-(((hBarP - 275) / 25) ** 2));
+  const rc = 2 * Math.sqrt(cBarP ** 7 / (cBarP ** 7 + pow25to7));
+  const sl = 1 + (0.015 * (lBarP - 50) ** 2) / Math.sqrt(20 + (lBarP - 50) ** 2);
+  const sc = 1 + 0.045 * cBarP;
+  const sh = 1 + 0.015 * cBarP * t;
+  const rt = -Math.sin((2 * deltaTheta * Math.PI) / 180) * rc;
+  return Math.sqrt(
+    (deltaLp / sl) ** 2
+    + (deltaCp / sc) ** 2
+    + (deltaHpPrime / sh) ** 2
+    + rt * (deltaCp / sc) * (deltaHpPrime / sh),
+  );
 }
 
 export function evaluateImage(
@@ -88,7 +137,7 @@ export function evaluateImage(
 
     if (refData) {
       const refIndex = Math.min(index, refData.length - 4);
-      deltaESum += deltaE76(
+      deltaESum += deltaE2000(
         rgbToLab(refData[refIndex], refData[refIndex + 1], refData[refIndex + 2]),
         rgbToLab(r1, g1, b1),
       );
@@ -130,20 +179,38 @@ export function evaluateImage(
   };
 }
 
-export function getSceneHints(image: RgbaImage) {
+export function getSceneHints(image: RgbaImage): SceneHints {
   let luma = 0;
   let clipped = 0;
   let sampled = 0;
+  let skin = 0;
+  let sky = 0;
+  let nature = 0;
+  let water = 0;
+
   for (let index = 0; index < image.data.length; index += 16) {
+    const pixel = index / 4;
+    const y = Math.floor(pixel / image.width);
     const r = image.data[index];
     const g = image.data[index + 1];
     const b = image.data[index + 2];
     luma += lumaOf(r, g, b);
     if (r <= 2 || g <= 2 || b <= 2 || r >= 253 || g >= 253 || b >= 253) clipped += 1;
+    if (isSkin(r, g, b)) skin += 1;
+    if (y < image.height * 0.55 && isSky(r, g, b)) sky += 1;
+    if (g > 62 && g > r * 1.06 && g > b * 1.01) nature += 1;
+    if (b > 70 && b > r * 1.1 && b > g * 1.025) water += 1;
     sampled += 1;
   }
+
+  const total = Math.max(1, sampled);
   return {
-    averageLuma: luma / Math.max(1, sampled),
-    clippingRatio: clipped / Math.max(1, sampled),
+    averageLuma: luma / total,
+    clippingRatio: clipped / total,
+    skinRatio: skin / total,
+    skyRatio: sky / total,
+    natureRatio: nature / total,
+    waterRatio: water / total,
+    aspectRatio: image.width / Math.max(1, image.height),
   };
 }

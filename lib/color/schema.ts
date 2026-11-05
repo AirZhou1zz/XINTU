@@ -1,8 +1,16 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 import { TOOL_IDS } from "./types";
 
 const bounded = (min: number, max: number) => z.coerce.number().min(min).max(max);
 
+const sceneCategorySchema = z.enum(["portrait", "landscape", "ocean", "mountain", "night", "city", "still_life", "other"]);
+const candidateStyleSchema = z.enum(["natural", "warm_film", "airy", "cinematic", "vivid", "soft"]);
+const candidateDirectionSchema = z.object({
+  id: z.enum(["A", "B", "C"]),
+  label: z.string().min(1).max(40),
+  description: z.string().min(1).max(160),
+  style: candidateStyleSchema,
+}).strict();
 export const colorParamsSchema = z
   .object({
     exposure: bounded(-100, 100),
@@ -27,6 +35,9 @@ export const agentPlanSchema = z
   .object({
     intent: z.string().min(1).max(240),
     sceneSummary: z.string().min(1).max(500),
+    sceneCategory: sceneCategorySchema,
+    sceneConfidence: z.number().min(0).max(1),
+    directions: z.array(candidateDirectionSchema).length(3),
     tools: z.array(toolIdSchema).min(1).max(4),
     constraints: z.array(z.string().min(1).max(180)).max(8),
   })

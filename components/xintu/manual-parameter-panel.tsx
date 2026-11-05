@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, RotateCcw, SlidersHorizontal, Timer, X } from "lucide-react";
+import { Check, RotateCcw, ScanEye, SlidersHorizontal, Star, Timer, X } from "lucide-react";
 import type { ColorParams, EvaluationResult } from "@/lib/color/types";
 import type { StudioConversationMessage } from "@/components/studio/use-studio";
+import type { VisualReview } from "@/lib/agent/visual-review";
 
 const groups: Array<{
   label: string;
@@ -49,6 +50,11 @@ type ManualParameterPanelProps = {
   manualRefinements: number;
   conversation: StudioConversationMessage[];
   busy: boolean;
+  visualReview: VisualReview | null;
+  isReviewing: boolean;
+  subjectiveScore: number | null;
+  onReview: () => Promise<boolean>;
+  onSubjectiveScore: (score: number) => void;
   onChange: (key: keyof ColorParams, value: number) => void;
   onReset: () => void;
   onClose: () => void;
@@ -67,6 +73,11 @@ export function ManualParameterPanel({
   manualRefinements,
   conversation,
   busy,
+  visualReview,
+  isReviewing,
+  subjectiveScore,
+  onReview,
+  onSubjectiveScore,
   onChange,
   onReset,
   onClose,
@@ -115,7 +126,7 @@ export function ManualParameterPanel({
         </div>
 
         <div className="xintu-parameter-metrics">
-          <div><span>ΔE LAB</span><strong>{evaluation.deltaE === null ? "无参考" : evaluation.deltaE.toFixed(1)}</strong></div>
+          <div><span>ΔE2000</span><strong>{evaluation.deltaE === null ? "无参考" : evaluation.deltaE.toFixed(1)}</strong></div>
           <div><span>肤色偏移</span><strong>{evaluation.skinShift.toFixed(1)}</strong></div>
           <div><span>天空偏移</span><strong>{evaluation.skyShift.toFixed(1)}</strong></div>
           <div><span>结构保持</span><strong>{(evaluation.structureScore * 100).toFixed(1)}%</strong></div>
@@ -124,6 +135,53 @@ export function ManualParameterPanel({
         </div>
 
 <div className="xintu-parameter-scroll">
+        <section className="xintu-visual-review">
+          <div className="xintu-visual-review-head">
+            <div>
+              <span>OPTIONAL / VISUAL REVIEW</span>
+              <strong>可选视觉模型复核</strong>
+            </div>
+            <button type="button" onClick={() => void onReview()} disabled={isReviewing || busy}>
+              <ScanEye size={14} />
+              {isReviewing ? "复核中…" : visualReview ? "重新复核" : "开始复核"}
+            </button>
+          </div>
+          {visualReview ? (
+            <div className="xintu-visual-review-result">
+              <div className="xintu-visual-review-score">
+                <strong>{Math.round(visualReview.score)}</strong>
+                <span>{visualReview.verdict === "pass" ? "PASS" : "NEEDS WORK"} · {visualReview.provider === "mock" ? "LOCAL REVIEW" : "QWEN REVIEW"}</span>
+              </div>
+              <p>{visualReview.summary}</p>
+              {visualReview.issues.length > 0 ? <ul>{visualReview.issues.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul> : null}
+              {visualReview.nextActions.length > 0 ? <small>建议：{visualReview.nextActions[0]}</small> : null}
+            </div>
+          ) : (
+            <p className="xintu-visual-review-empty">会额外调用一次视觉模型，只提供评审意见，不进入自动修正闭环。</p>
+          )}
+        </section>
+
+        <section className="xintu-subjective-rating">
+          <div>
+            <span>YOUR SCORE</span>
+            <strong>你的主观评分</strong>
+          </div>
+          <div className="xintu-rating-stars" aria-label="主观评分">
+            {[1, 2, 3, 4, 5].map((score) => (
+              <button
+                type="button"
+                key={score}
+                className={subjectiveScore !== null && score <= subjectiveScore ? "is-active" : ""}
+                aria-label={`${score} 分`}
+                aria-pressed={subjectiveScore === score}
+                onClick={() => onSubjectiveScore(score)}
+              >
+                <Star size={15} fill="currentColor" />
+              </button>
+            ))}
+          </div>
+          <small>仅记录当前会话中的个人判断，不参与自动评估。</small>
+        </section>
         <section className="xintu-feedback">
           <div className="xintu-feedback-heading">
             <span>CONTINUE WITH XINTU</span>

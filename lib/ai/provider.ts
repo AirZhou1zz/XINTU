@@ -1,6 +1,7 @@
-import type { AgentPlan, ColorParams, Strength } from "@/lib/color/types";
+import type { AgentPlan, ColorParams, SceneHints, Strength } from "@/lib/color/types";
 import { MockProvider } from "./mock-provider";
 import { hasLiveProviderCredentials, OpenAICompatibleProvider } from "./openai-compatible";
+import type { ReviewInput, VisualReview } from "@/lib/agent/visual-review";
 
 export type ProviderName = "mock" | "openai-compatible";
 
@@ -9,10 +10,7 @@ export type AnalyzeInput = {
   strength: Strength;
   imageDataUrl: string;
   referenceDataUrl?: string;
-  sceneHints?: {
-    averageLuma: number;
-    clippingRatio: number;
-  };
+  sceneHints?: SceneHints;
 };
 
 export type RefineInput = {
@@ -40,6 +38,7 @@ export interface ColorProvider {
   readonly name: ProviderName;
   analyze(input: AnalyzeInput): Promise<AnalyzeOutput>;
   refine(input: RefineInput): Promise<RefineOutput>;
+  review(input: ReviewInput): Promise<VisualReview>;
 }
 
 export function getProvider(): ColorProvider {
@@ -64,5 +63,14 @@ export async function refineWithFallback(input: RefineInput): Promise<RefineOutp
   } catch (error) {
     console.warn("Live refine failed, falling back to mock:", error instanceof Error ? error.message : "unknown");
     return new MockProvider().refine(input);
+  }
+}
+
+export async function reviewWithFallback(input: ReviewInput): Promise<VisualReview> {
+  try {
+    return await getProvider().review(input);
+  } catch (error) {
+    console.warn("Live visual review failed, falling back to mock:", error instanceof Error ? error.message : "unknown");
+    return new MockProvider().review(input);
   }
 }

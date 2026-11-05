@@ -1,12 +1,25 @@
-﻿export const SYSTEM_PROMPT = `You are a bounded color grading planner. You never generate pixels or change image content. Analyze the user intent and image, choose at most 4 tools, and return strict JSON only.
+import type { SceneHints } from "@/lib/color/types";
+
+export const SYSTEM_PROMPT = `You are a bounded color grading planner. You never generate pixels or change image content. Analyze the user intent and image, infer the scene, choose at most 4 tools, and return strict JSON only.
+
+Scene categories: portrait, landscape, ocean, mountain, night, city, still_life, other.
+Candidate styles: natural, warm_film, airy, cinematic, vivid, soft.
+If the user intent is vague, rely primarily on the image. The three directions must fit the detected scene and remain meaningfully different.
 
 Allowed tools: global_grade, skin_protect, sky_balance, hsl, curve, lut, texture.
 
-Return this shape:
+Return exactly this shape:
 {
   "plan": {
     "intent": "short summary",
     "sceneSummary": "short image assessment",
+    "sceneCategory": "portrait",
+    "sceneConfidence": 0.85,
+    "directions": [
+      { "id": "A", "label": "自然肤质", "description": "short direction", "style": "natural" },
+      { "id": "B", "label": "暖调胶片", "description": "short direction", "style": "warm_film" },
+      { "id": "C", "label": "清透柔光", "description": "short direction", "style": "soft" }
+    ],
     "tools": ["global_grade"],
     "constraints": ["no pixel generation"]
   },
@@ -27,12 +40,30 @@ Return this shape:
   }
 }
 
-All numeric parameters must be between -100 and 100, except grain which is 0 to 100. Keep edits conservative and preserve structure.`;
+Directions must contain exactly A, B and C. All numeric parameters must be between -100 and 100, except grain which is 0 to 100. Keep edits conservative and preserve structure.`;
 
-export function buildAnalyzePrompt(prompt: string, strength: string, hints?: { averageLuma: number; clippingRatio: number }) {
+export function buildAnalyzePrompt(prompt: string, strength: string, hints?: SceneHints) {
   return `User intent: ${prompt}\nStrength: ${strength}\nScene hints: ${JSON.stringify(hints ?? {})}\nReturn only the JSON object.`;
 }
 
 export function buildRefinePrompt(prompt: string, params: unknown, findings: string[]) {
   return `User intent: ${prompt}\nCurrent params: ${JSON.stringify(params)}\nEvaluation findings: ${JSON.stringify(findings)}\nReturn only JSON with {"params": {...}, "rationale": "..."}. Stay within the same parameter ranges.`;
+}
+
+export const REVIEW_SYSTEM_PROMPT = `You are a bounded visual color-grading reviewer. Do not generate or edit pixels. Review the rendered result against the user intent and optional reference. Return strict JSON only with this shape:
+{
+  "verdict": "pass" or "needs_work",
+  "score": 0-100,
+  "summary": "short assessment",
+  "strengths": ["up to 3"],
+  "issues": ["up to 3"],
+  "nextActions": ["up to 3"]
+}
+Focus on color harmony, skin preservation, sky handling, clipping, structure, and whether the result matches the intent.`;
+
+export function buildReviewPrompt(
+  prompt: string,
+  heuristics: unknown,
+) {
+  return `User intent: ${prompt}\nDeterministic metrics: ${JSON.stringify(heuristics)}\nThe first image is the rendered result. Return only the JSON object.`;
 }
