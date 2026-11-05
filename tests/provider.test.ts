@@ -22,7 +22,7 @@ const testParams = {
   skyTemperature: -2,
 };
 
-const envKeys = ["AI_PROVIDER", "OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENAI_MODEL", "VERCEL_OIDC_TOKEN"] as const;
+const envKeys = ["AI_PROVIDER", "OPENAI_API_KEY", "AI_GATEWAY_API_KEY", "OPENAI_BASE_URL", "OPENAI_MODEL", "VERCEL_OIDC_TOKEN"] as const;
 
 function snapshotEnvironment() {
   return new Map(envKeys.map((key) => [key, process.env[key]]));
@@ -321,6 +321,44 @@ describe("live provider configuration", () => {
         model: "alibaba/qwen3.8-flash",
         response_format: { type: "json_object" },
       });
+    } finally {
+      vi.unstubAllGlobals();
+      restoreEnvironment(snapshot);
+    }
+  });
+  it("uses a Vercel AI Gateway API key for Qwen 3.8", async () => {
+    const snapshot = snapshotEnvironment();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: JSON.stringify({ params: testParams, rationale: "Gateway 测试" }) } }],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      process.env.AI_PROVIDER = "openai";
+      delete process.env.OPENAI_API_KEY;
+      delete process.env.OPENAI_BASE_URL;
+      delete process.env.OPENAI_MODEL;
+      delete process.env.VERCEL_OIDC_TOKEN;
+      process.env.AI_GATEWAY_API_KEY = "test-gateway-key";
+
+      const output = await new OpenAICompatibleProvider().refine({
+        prompt: "电影感街景",
+        strength: "medium",
+        params: testParams,
+        findings: ["降低高光。"],
+        iteration: 0,
+      });
+
+      expect(output.provider).toBe("openai-compatible");
+      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe("https://ai-gateway.vercel.sh/v1/chat/completions");
+      expect(new Headers(init.headers).get("Authorization")).toBe("Bearer test-gateway-key");
+      expect(JSON.parse(String(init.body))).toMatchObject({ model: "alibaba/qwen3.8-flash" });
     } finally {
       vi.unstubAllGlobals();
       restoreEnvironment(snapshot);

@@ -26,24 +26,26 @@ function isVercelGateway(baseUrl: string) {
 
 export function hasLiveProviderCredentials() {
   const apiKey = environmentValue("OPENAI_API_KEY");
+  const gatewayApiKey = environmentValue("AI_GATEWAY_API_KEY");
   const oidcToken = environmentValue("VERCEL_OIDC_TOKEN");
   const configuredBaseUrl = environmentValue("OPENAI_BASE_URL");
-  return Boolean(apiKey || (oidcToken && (!configuredBaseUrl || isVercelGateway(configuredBaseUrl))));
+  return Boolean(apiKey || gatewayApiKey || (oidcToken && (!configuredBaseUrl || isVercelGateway(configuredBaseUrl))));
 }
 
 export function getProviderConfig(): ProviderConfig {
   const apiKey = environmentValue("OPENAI_API_KEY");
+  const gatewayApiKey = environmentValue("AI_GATEWAY_API_KEY");
   const oidcToken = environmentValue("VERCEL_OIDC_TOKEN");
   const configuredBaseUrl = environmentValue("OPENAI_BASE_URL");
-  const canUseGatewayOidc = !apiKey && Boolean(oidcToken) && (!configuredBaseUrl || isVercelGateway(configuredBaseUrl));
-  const token = apiKey || (canUseGatewayOidc ? oidcToken : undefined);
+  const canUseGatewayOidc = !apiKey && !gatewayApiKey && Boolean(oidcToken) && (!configuredBaseUrl || isVercelGateway(configuredBaseUrl));
+  const token = apiKey || gatewayApiKey || (canUseGatewayOidc ? oidcToken : undefined);
   if (!token) throw new Error("No matching live AI provider credentials are configured");
 
-  const usingGatewayOidc = !apiKey && canUseGatewayOidc;
-  const baseUrl = (configuredBaseUrl || (usingGatewayOidc ? "https://ai-gateway.vercel.sh/v1" : "https://api.openai.com/v1")).replace(/\/+$/, "");
+  const usingGateway = Boolean(gatewayApiKey) || canUseGatewayOidc;
+  const baseUrl = (configuredBaseUrl || (usingGateway ? "https://ai-gateway.vercel.sh/v1" : "https://api.openai.com/v1")).replace(/\/+$/, "");
   const usingDashScope = baseUrl.includes("dashscope.aliyuncs.com");
   const model = environmentValue("OPENAI_MODEL")
-    || (usingGatewayOidc ? "alibaba/qwen3.8-flash" : usingDashScope ? "qwen3.8-flash" : "gpt-4.1-mini");
+    || (usingGateway ? "alibaba/qwen3.8-flash" : usingDashScope ? "qwen3.8-flash" : "gpt-4.1-mini");
 
   return { token, baseUrl, model };
 }
