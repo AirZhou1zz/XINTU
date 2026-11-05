@@ -309,7 +309,16 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
     setNodeText(root, "9_1865", `xintu-color-grade.png · ${candidate.pixels.width} × ${candidate.pixels.height}`);
   }, [screen, studio.activeCandidate, studio.candidates, studio.prompt]);
 
-  const startAnalysis = useCallback(async () => {
+  useEffect(() => {
+    const root = stageRef.current;
+    if (!root || screen !== "error") return;
+    const message = studio.error || "生成没有完成，请重新尝试。";
+    setNodeText(root, "9_1898", "ERROR");
+    setNodeText(root, "9_1899", message);
+    setNodeText(root, "9_1977_0_1", message);
+    setNodeText(root, "9_1978", "ERROR · SAFE STOP");
+  }, [screen, studio.error]);
+  const startAnalysis = useCallback(async (forceMock = false) => {
     if (!studio.target) {
       showNotice("请先上传一张照片。");
       return;
@@ -320,7 +329,7 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
     }
     const token = ++navigationTokenRef.current;
     setScreen("processing");
-    const [success] = await Promise.all([studio.analyze(), wait(1100)]);
+    const [success] = await Promise.all([studio.analyze(undefined, forceMock), wait(1100)]);
     if (navigationTokenRef.current === token) setScreen(success ? "results" : "error");
   }, [showNotice, studio]);
 
@@ -441,8 +450,12 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
     }
 
     if (screen === "error") {
-      if (id === "9_1967" || id === "9_1980" || id === "9_1982") {
+      if (id === "9_1967" || id === "9_1980") {
         if (studio.target) return void startAnalysis();
+        return fileInputRef.current?.click();
+      }
+      if (id === "9_1982") {
+        if (studio.target) return void startAnalysis(true);
         return fileInputRef.current?.click();
       }
     }

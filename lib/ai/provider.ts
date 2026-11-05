@@ -11,6 +11,7 @@ export type AnalyzeInput = {
   imageDataUrl: string;
   referenceDataUrl?: string;
   sceneHints?: SceneHints;
+  forceMock?: boolean;
 };
 
 export type RefineInput = {
@@ -49,6 +50,7 @@ export function getProvider(): ColorProvider {
 }
 
 export async function analyzeWithFallback(input: AnalyzeInput): Promise<AnalyzeOutput> {
+  if (input.forceMock) return new MockProvider().analyze(input);
   try {
     return await getProvider().analyze(input);
   } catch (error) {

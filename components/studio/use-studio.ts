@@ -181,7 +181,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
     }, 64);
   }, [activeCandidate, reference, target]);
 
-  const analyze = useCallback(async (targetOverride?: LoadedImageState) => {
+  const analyze = useCallback(async (targetOverride?: LoadedImageState, forceMock = false) => {
     const activeTarget = targetOverride ?? target;
     if (!activeTarget) {
       setError("请先上传一张目标照片。");
@@ -219,6 +219,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
           imageDataUrl,
           referenceDataUrl,
           sceneHints,
+          forceMock,
         }),
       });
       if (!analyzeResponse.ok) {
