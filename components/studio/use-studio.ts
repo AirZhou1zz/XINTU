@@ -77,6 +77,7 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
   const [conversation, setConversation] = useState<StudioConversationMessage[]>([]);
   const [visualReview, setVisualReview] = useState<VisualReview | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
+  const lastReviewKeyRef = useRef("");
   const renderTimerRef = useRef<number | null>(null);
 
   const activeCandidate = useMemo(
@@ -449,6 +450,21 @@ export function useStudio(initialPrompt = "日系、通透，肤色自然，保�
       setIsReviewing(false);
     }
   }, [activeCandidate, isReviewing, prompt, reference, target]);
+  const reviewKey = useMemo(() => {
+    if (!activeCandidate) return "";
+    const paramValues = Object.values(activeCandidate.params).join(",");
+    return `${activeCandidate.id}:${paramValues}:${activeCandidate.evaluation.skinShift.toFixed(1)}:${activeCandidate.evaluation.skyShift.toFixed(1)}`;
+  }, [activeCandidate]);
+
+  useEffect(() => {
+    if (status !== "done" || !activeCandidate || isReviewing || !reviewKey) return;
+    if (lastReviewKeyRef.current === reviewKey) return;
+    const timer = window.setTimeout(() => {
+      lastReviewKeyRef.current = reviewKey;
+      void reviewCurrentCandidate();
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [activeCandidate, isReviewing, reviewCurrentCandidate, reviewKey, status]);
   const resetActiveParams = useCallback(() => {
     if (!target || !activeCandidate) return;
     const rendered = renderColorGrade(target.pixels, activeCandidate.aiParams);

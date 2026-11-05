@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowLeftRight, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, Sparkles } from "lucide-react";
 import { ManualParameterPanel } from "./manual-parameter-panel";
 import { useStudio } from "@/components/studio/use-studio";
 import Frame91309 from "./frames/Frame91309";
@@ -106,7 +106,6 @@ export function XintuProduct({ initialPreset = "custom" }: XintuProductProps) {
   const [offsetX, setOffsetX] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [comparePosition, setComparePosition] = useState(52);
-  const [parameterPanelOpen, setParameterPanelOpen] = useState(false);
   const [subjectiveScore, setSubjectiveScore] = useState<number | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -559,18 +558,6 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
           <span>{studio.target ? "生成 3 个候选" : "先上传照片"}</span>
           <small>{studio.target ? "AI PLAN" : "JPG / PNG / WEBP"}</small>
         </button>
-      ) : null}      {screen === "results" && studio.activeCandidate ? (
-        <button
-          type="button"
-          className="xintu-tune-trigger"
-          onClick={() => setParameterPanelOpen(true)}
-          aria-expanded={parameterPanelOpen}
-          aria-controls="xintu-parameter-panel"
-        >
-          <SlidersHorizontal size={16} />
-          <span>参数微调</span>
-          <small>13</small>
-        </button>
       ) : null}
       {isMobile && screen === "upload" ? (
         <button type="button" className="xintu-mobile-demo" onClick={() => void startWithDemo()}>
@@ -636,7 +623,6 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
         </div>
       {screen === "results" && studio.activeCandidate ? (
         <ManualParameterPanel
-          open={parameterPanelOpen}
           params={studio.activeCandidate.params}
           aiParams={studio.activeCandidate.aiParams}
           evaluation={studio.activeCandidate.evaluation}
@@ -648,13 +634,11 @@ setNodeText(root, "9_1730", `${candidate.id} / ${candidate.label.toUpperCase()}`
           visualReview={studio.visualReview}
           isReviewing={studio.isReviewing}
           subjectiveScore={subjectiveScore}
-          onReview={studio.reviewCurrentCandidate}
           onSubjectiveScore={setSubjectiveScore}
           onChange={studio.updateParam}
           onReset={studio.resetActiveParams}
-          onClose={() => setParameterPanelOpen(false)}
-          onAccept={() => { setParameterPanelOpen(false); showNotice("当前参数已应用，可继续导出 PNG。"); }}
-          onExport={() => { setParameterPanelOpen(false); handleExport(); }}
+          onAccept={() => showNotice("当前参数已应用，可继续导出 PNG。")}
+          onExport={handleExport}
           onFeedback={studio.refineFromFeedback}
         />
       ) : null}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, RotateCcw, ScanEye, SlidersHorizontal, Star, Timer, X } from "lucide-react";
+import { useState } from "react";
+import { Check, RotateCcw, ScanEye, SlidersHorizontal, Star, Timer } from "lucide-react";
 import type { ColorParams, EvaluationResult } from "@/lib/color/types";
 import type { StudioConversationMessage } from "@/components/studio/use-studio";
 import type { VisualReview } from "@/lib/agent/visual-review";
@@ -41,7 +41,6 @@ const groups: Array<{
 ];
 
 type ManualParameterPanelProps = {
-  open: boolean;
   params: ColorParams;
   aiParams: ColorParams;
   evaluation: EvaluationResult;
@@ -53,18 +52,15 @@ type ManualParameterPanelProps = {
   visualReview: VisualReview | null;
   isReviewing: boolean;
   subjectiveScore: number | null;
-  onReview: () => Promise<boolean>;
   onSubjectiveScore: (score: number) => void;
   onChange: (key: keyof ColorParams, value: number) => void;
   onReset: () => void;
-  onClose: () => void;
   onAccept: () => void;
   onExport: () => void;
   onFeedback: (message: string) => Promise<boolean>;
 };
 
 export function ManualParameterPanel({
-  open,
   params,
   aiParams,
   evaluation,
@@ -76,77 +72,57 @@ export function ManualParameterPanel({
   visualReview,
   isReviewing,
   subjectiveScore,
-  onReview,
   onSubjectiveScore,
   onChange,
   onReset,
-  onClose,
   onAccept,
   onExport,
   onFeedback,
 }: ManualParameterPanelProps) {
   const [feedback, setFeedback] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, open]);
-
-  if (!open) return null;
-
   const valuesUnchanged = Object.keys(params).every(
     (key) => params[key as keyof ColorParams] === aiParams[key as keyof ColorParams],
   );
   const duration = elapsedMs === null ? "—" : elapsedMs >= 1000 ? `${(elapsedMs / 1000).toFixed(1)}s` : `${elapsedMs}ms`;
 
   return (
-    <div className="xintu-parameter-layer" role="dialog" aria-modal="true" aria-label="参数微调">
-      <button className="xintu-parameter-backdrop" type="button" aria-label="关闭参数微调" onClick={onClose} />
-      <aside id="xintu-parameter-panel" className="xintu-parameter-panel">
-        <header className="xintu-parameter-header">
-          <div>
-            <span className="xintu-parameter-kicker">MANUAL CONTROL / 13 PARAMS</span>
-            <h2><SlidersHorizontal size={19} /> 继续微调</h2>
-          </div>
-          <button type="button" className="xintu-parameter-close" onClick={onClose} aria-label="关闭参数微调">
-            <X size={18} />
-          </button>
-        </header>
-
-        <div className="xintu-parameter-status">
-          <span className={evaluation.pass ? "is-pass" : "is-warn"}>
-            {evaluation.pass ? <Check size={13} /> : <Timer size={13} />}
-            {evaluation.pass ? "当前候选通过阈值" : "仍有指标偏差"}
-          </span>
-          <span>实时更新画布</span>
+    <aside id="xintu-parameter-panel" className="xintu-parameter-panel" aria-label="实时参数微调">
+      <header className="xintu-parameter-header">
+        <div>
+          <span className="xintu-parameter-kicker">AGENT CONTROL / LIVE</span>
+          <h2><SlidersHorizontal size={19} /> 实时微调</h2>
         </div>
+      </header>
 
-        <div className="xintu-parameter-metrics">
-          <div><span>ΔE2000</span><strong>{evaluation.deltaE === null ? "无参考" : evaluation.deltaE.toFixed(1)}</strong></div>
-          <div><span>肤色偏移</span><strong>{evaluation.skinShift.toFixed(1)}</strong></div>
-          <div><span>天空偏移</span><strong>{evaluation.skyShift.toFixed(1)}</strong></div>
-          <div><span>结构保持</span><strong>{(evaluation.structureScore * 100).toFixed(1)}%</strong></div>
-          <div><span>参数合法率</span><strong>{evaluation.schemaValid ? "100%" : "0%"}</strong></div>
-          <div><span>耗时 · 修正</span><strong>{duration} / 自动{iterations}轮 · 手动{manualRefinements}次</strong></div>
-        </div>
+      <div className="xintu-parameter-status">
+        <span className={evaluation.pass ? "is-pass" : "is-warn"}>
+          {evaluation.pass ? <Check size={13} /> : <Timer size={13} />}
+          {evaluation.pass ? "当前候选通过阈值" : "仍有指标偏差"}
+        </span>
+        <span>拖动即更新画面</span>
+      </div>
 
-<div className="xintu-parameter-scroll">
+      <div className="xintu-parameter-metrics">
+        <div><span>ΔE2000</span><strong>{evaluation.deltaE === null ? "无参考" : evaluation.deltaE.toFixed(1)}</strong></div>
+        <div><span>肤色偏移</span><strong>{evaluation.skinShift.toFixed(1)}</strong></div>
+        <div><span>天空偏移</span><strong>{evaluation.skyShift.toFixed(1)}</strong></div>
+        <div><span>结构保持</span><strong>{(evaluation.structureScore * 100).toFixed(1)}%</strong></div>
+        <div><span>参数合法率</span><strong>{evaluation.schemaValid ? "100%" : "0%"}</strong></div>
+        <div><span>耗时 · 修正</span><strong>{duration} / 自动{iterations}轮 · 手动{manualRefinements}次</strong></div>
+      </div>
+
+      <div className="xintu-parameter-scroll">
         <section className="xintu-visual-review">
           <div className="xintu-visual-review-head">
             <div>
-              <span>OPTIONAL / VISUAL REVIEW</span>
-              <strong>可选视觉模型复核</strong>
+              <span>AGENT VISUAL REVIEW</span>
+              <strong>视觉模型复核</strong>
             </div>
-            <button type="button" onClick={() => void onReview()} disabled={isReviewing || busy}>
-              <ScanEye size={14} />
-              {isReviewing ? "复核中…" : visualReview ? "重新复核" : "开始复核"}
-            </button>
+            <ScanEye size={16} />
           </div>
-          {visualReview ? (
+          {isReviewing ? (
+            <p className="xintu-visual-review-empty">Agent 正在复核当前画面，完成后自动更新结果。</p>
+          ) : visualReview ? (
             <div className="xintu-visual-review-result">
               <div className="xintu-visual-review-score">
                 <strong>{Math.round(visualReview.score)}</strong>
@@ -157,7 +133,7 @@ export function ManualParameterPanel({
               {visualReview.nextActions.length > 0 ? <small>建议：{visualReview.nextActions[0]}</small> : null}
             </div>
           ) : (
-            <p className="xintu-visual-review-empty">会额外调用一次视觉模型，只提供评审意见，不进入自动修正闭环。</p>
+            <p className="xintu-visual-review-empty">生成结果后会自动进行视觉复核，无需手动触发。</p>
           )}
         </section>
 
@@ -182,6 +158,7 @@ export function ManualParameterPanel({
           </div>
           <small>仅记录当前会话中的个人判断，不参与自动评估。</small>
         </section>
+
         <section className="xintu-feedback">
           <div className="xintu-feedback-heading">
             <span>CONTINUE WITH XINTU</span>
@@ -223,42 +200,42 @@ export function ManualParameterPanel({
             </button>
           </div>
         </section>
-{groups.map((group) => (
-            <section className="xintu-parameter-group" key={group.label}>
-              <h3>{group.label}</h3>
-              {group.controls.map((control) => {
-                const value = params[control.key];
-                const aiValue = aiParams[control.key];
-                return (
-                  <label className="xintu-range-row" key={control.key}>
-                    <span className="xintu-range-label">
-                      <span>{control.label}<small>AI {Math.round(aiValue)}</small></span>
-                      <strong>{Math.round(value)}</strong>
-                    </span>
-                    <input
-                      type="range"
-                      min={control.min}
-                      max={control.max}
-                      step={1}
-                      value={value}
-                      aria-label={control.label}
-                      onChange={(event) => onChange(control.key, Number(event.target.value))}
-                    />
-                  </label>
-                );
-              })}
-            </section>
-          ))}
-        </div>
 
-        <footer className="xintu-parameter-actions">
-          <button type="button" className="xintu-parameter-reset" onClick={onReset} disabled={valuesUnchanged}>
-            <RotateCcw size={15} /> 恢复 AI 原值
-          </button>
-          <button type="button" className="xintu-parameter-accept" onClick={onAccept}>应用当前参数</button>
-          <button type="button" className="xintu-parameter-export" onClick={onExport}>导出 PNG</button>
-        </footer>
-      </aside>
-    </div>
+        {groups.map((group) => (
+          <section className="xintu-parameter-group" key={group.label}>
+            <h3>{group.label}</h3>
+            {group.controls.map((control) => {
+              const value = params[control.key];
+              const aiValue = aiParams[control.key];
+              return (
+                <label className="xintu-range-row" key={control.key}>
+                  <span className="xintu-range-label">
+                    <span>{control.label}<small>AI {Math.round(aiValue)}</small></span>
+                    <strong>{Math.round(value)}</strong>
+                  </span>
+                  <input
+                    type="range"
+                    min={control.min}
+                    max={control.max}
+                    step={1}
+                    value={value}
+                    aria-label={control.label}
+                    onChange={(event) => onChange(control.key, Number(event.target.value))}
+                  />
+                </label>
+              );
+            })}
+          </section>
+        ))}
+      </div>
+
+      <footer className="xintu-parameter-actions">
+        <button type="button" className="xintu-parameter-reset" onClick={onReset} disabled={valuesUnchanged}>
+          <RotateCcw size={15} /> 恢复 AI 原值
+        </button>
+        <button type="button" className="xintu-parameter-accept" onClick={onAccept}>应用当前参数</button>
+        <button type="button" className="xintu-parameter-export" onClick={onExport}>导出 PNG</button>
+      </footer>
+    </aside>
   );
 }
