@@ -1,4 +1,4 @@
-# XINTU
+﻿# XINTU
 
 ### 基于参考图的 AI 调色 Agent，不生成任何新像素。
 
@@ -18,7 +18,7 @@
   ·
   <a href="https://xintu-demo.vercel.app"><strong>免费体验公开 Demo</strong></a>
   ·
-  <a href="docs/live-qwen-export.png">查看真实千问效果</a>
+  <a href="#真实千问案例">查看真实千问案例</a>
   ·
   <a href="#工作方式">了解工作流</a>
 </p>
@@ -55,6 +55,40 @@
 
 ![XINTU Demo](docs/public-demo.png)
 
+## 真实千问案例
+
+以下三组素材于 **2026-11-06** 使用 `qwen3.8-flash` 通过 DashScope 实际运行：模型完成视觉分析、自动修正和候选复核，最终由 Canvas 2D 对原始像素进行本地确定性渲染。它们不是 Mock 结果，也不是“每次访问都实时调用”的假象。
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <strong>电影照片 · 油画感街道</strong><br>
+      <sub>“电影照片-油画感街道” · 强度：强</sub><br><br>
+      <img src="public/portfolio/showcase/street-before.webp" width="260" alt="街道原图"><br>
+      <sub>原图</sub><br><br>
+      <img src="public/portfolio/showcase/street-a.webp" width="260" alt="Qwen 街道调色结果"><br>
+      <sub>Qwen 推荐 A / 电影胶片 · 复核 70</sub>
+    </td>
+    <td width="33%" valign="top">
+      <strong>人像照片 · 日系明亮柔和</strong><br>
+      <sub>“人像照片-日系明亮柔和人像” · 强度：中</sub><br><br>
+      <img src="public/portfolio/showcase/portrait-before.webp" width="260" alt="人像原图"><br>
+      <sub>原图</sub><br><br>
+      <img src="public/portfolio/showcase/portrait-c.webp" width="260" alt="Qwen 人像调色结果"><br>
+      <sub>Qwen 推荐 C / 柔光胶片 · 复核 93</sub>
+    </td>
+    <td width="33%" valign="top">
+      <strong>山湖风光 · 震撼感</strong><br>
+      <sub>“风景-山湖风光，震撼感” · 强度：强</sub><br><br>
+      <img src="public/portfolio/showcase/landscape-before.webp" width="260" alt="山湖风光原图"><br>
+      <sub>原图</sub><br><br>
+      <img src="public/portfolio/showcase/landscape-a.webp" width="260" alt="Qwen 山湖风光调色结果"><br>
+      <sub>Qwen 推荐 A / 自然通透 · 复核 68</sub>
+    </td>
+  </tr>
+</table>
+
+真实的场景判断、参数、复核意见与原始运行记录见 [qwen-cases.json](public/portfolio/showcase/qwen-cases.json)。街道和风景案例仍有动态范围损失，保留这些分数与问题，是为了展示评估闭环，而不是只挑“成功图”。
 ## Demo 模式
 
 | 模式 | 模型 | API 费用 | 用途 |
@@ -131,7 +165,7 @@ AI_PROVIDER=openai
 OPENAI_API_KEY=your-dashscope-api-key
 OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 OPENAI_MODEL=qwen3.8-flash
-AI_TIMEOUT_MS=45000
+AI_TIMEOUT_MS=55000
 MAX_IMAGE_MB=15
 ```
 
@@ -169,7 +203,7 @@ npm test
 npm run build
 ```
 
-仓库包含 5 个测试文件、27 项单元测试，以及 GitHub Actions CI 工作流。
+仓库包含 5 个测试文件、36 项单元测试，以及 GitHub Actions CI 工作流。
 
 ## 安全与隐私
 

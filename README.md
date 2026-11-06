@@ -1,4 +1,4 @@
-# XINTU
+﻿# XINTU
 
 ### Reference-based AI color grading that never generates pixels.
 
@@ -18,7 +18,7 @@
   ·
   <a href="https://xintu-demo.vercel.app"><strong>Try the free demo</strong></a>
   ·
-  <a href="docs/live-qwen-export.png">See real Qwen output</a>
+  <a href="#real-qwen-runs">See real Qwen runs</a>
   ·
   <a href="#how-it-works">Read the workflow</a>
 </p>
@@ -55,6 +55,40 @@ This makes the project useful as both a small photo-editing product and a refere
 
 ![XINTU demo](docs/public-demo.png)
 
+## Real Qwen runs
+
+These three sets were generated on **2026-11-06** with `qwen3.8-flash` through DashScope. Qwen performed the visual analysis, bounded refinements, and candidate review; the final pixels were rendered deterministically by Canvas 2D. These are not Mock outputs or a claim that every live visit is guaranteed to run through Qwen.
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <strong>Cinematic street · oil-paint mood</strong><br>
+      <sub>“电影照片-油画感街道” · high strength</sub><br><br>
+      <img src="public/portfolio/showcase/street-before.webp" width="260" alt="Street source"><br>
+      <sub>Original</sub><br><br>
+      <img src="public/portfolio/showcase/street-a.webp" width="260" alt="Qwen street grade"><br>
+      <sub>Qwen pick A / Cinematic film · review 70</sub>
+    </td>
+    <td width="33%" valign="top">
+      <strong>Portrait · bright Japanese softness</strong><br>
+      <sub>“人像照片-日系明亮柔和人像” · medium strength</sub><br><br>
+      <img src="public/portfolio/showcase/portrait-before.webp" width="260" alt="Portrait source"><br>
+      <sub>Original</sub><br><br>
+      <img src="public/portfolio/showcase/portrait-c.webp" width="260" alt="Qwen portrait grade"><br>
+      <sub>Qwen pick C / Soft film · review 93</sub>
+    </td>
+    <td width="33%" valign="top">
+      <strong>Mountain lake · dramatic scale</strong><br>
+      <sub>“风景-山湖风光，震撼感” · high strength</sub><br><br>
+      <img src="public/portfolio/showcase/landscape-before.webp" width="260" alt="Mountain lake source"><br>
+      <sub>Original</sub><br><br>
+      <img src="public/portfolio/showcase/landscape-a.webp" width="260" alt="Qwen mountain lake grade"><br>
+      <sub>Qwen pick A / Natural clarity · review 68</sub>
+    </td>
+  </tr>
+</table>
+
+See [qwen-cases.json](public/portfolio/showcase/qwen-cases.json) for the actual scene decisions, parameters, and review notes. The street and landscape cases still show dynamic-range loss; those scores and issues are kept visible to demonstrate the evaluation loop rather than presenting only polished wins.
 ## Demo modes
 
 | Mode | Model | API cost | Purpose |
@@ -131,7 +165,7 @@ AI_PROVIDER=openai
 OPENAI_API_KEY=your-dashscope-api-key
 OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 OPENAI_MODEL=qwen3.8-flash
-AI_TIMEOUT_MS=45000
+AI_TIMEOUT_MS=55000
 MAX_IMAGE_MB=15
 ```
 
@@ -169,7 +203,7 @@ npm test
 npm run build
 ```
 
-The repository includes 27 unit tests across five test files and a GitHub Actions CI workflow.
+The repository includes 36 unit tests across five test files and a GitHub Actions CI workflow.
 
 ## Security and privacy
 

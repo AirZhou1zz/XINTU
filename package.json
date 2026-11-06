@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "portfolio:qr": "node scripts/generate-portfolio-qr.mjs",
-    "portfolio:pages": "node scripts/export-portfolio-pages.mjs"
+    "portfolio:pages": "node scripts/export-portfolio-pages.mjs",
+    "showcase:qwen": "node --experimental-strip-types scripts/generate-qwen-showcase.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
