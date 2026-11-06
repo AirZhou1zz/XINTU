@@ -30,6 +30,7 @@ XINTU is a bounded Agentic Color Grading workflow for photo color grading. The A
 - A/B/C and intensity controls appear directly below the photo.
 - Scene-aware metrics: portrait mode shows skin metrics; other scenes use clipping and scene metrics.
 - Old duplicate Pixso result cards and exploratory design artifacts are removed.
+- Real Qwen showcase: three audited DashScope runs for city, portrait, and mountain-lake scenes, with A/B/C candidates, review scores, and preserved parameter metadata.
 
 ## Public Entry Points
 
@@ -56,3 +57,11 @@ npm.cmd run build
 ```
 
 Current baseline: 5 test files, 36 tests passing.
+
+Real showcase regeneration (uses DashScope quota):
+
+```powershell
+npm.cmd run showcase:qwen
+```
+
+Showcase assets and metadata live in `public/portfolio/showcase/`.
