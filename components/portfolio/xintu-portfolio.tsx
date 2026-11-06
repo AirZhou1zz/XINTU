@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDown,
@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import styles from "./xintu-portfolio.module.css";
+import { QwenCaseGallery, type ShowcaseCase } from "./qwen-case-gallery";
 
 const demoUrl = "https://xintu-demo.vercel.app";
 const githubUrl = "https://github.com/AirZhou1zz/XINTU";
@@ -64,10 +65,120 @@ const workflow = [
 const metrics = [
   { value: "03", label: "候选方案", detail: "同一次任务生成 3 个可比较结果" },
   { value: "13", label: "手动参数", detail: "在 AI 结果上继续精细调整" },
-  { value: "27", label: "自动化测试", detail: "5 个测试文件全部通过" },
+  { value: "36", label: "自动化测试", detail: "5 个测试文件全部通过" },
   { value: "02", label: "最大修正轮次", detail: "用明确边界控制成本与等待" },
 ];
 
+const showcaseCases: ShowcaseCase[] = [
+  {
+    id: "street",
+    index: "CASE 01",
+    title: "电影照片 · 油画感街道",
+    prompt: "电影照片-油画感街道",
+    scene: "城市街景",
+    refinements: 2,
+    before: "/portfolio/showcase/street-before.webp",
+    recommendedCandidateId: "A",
+    candidates: [
+      {
+        id: "A",
+        label: "电影胶片",
+        score: 70,
+        verdict: "needs_work",
+        summary: "红砖质感与电影氛围成立，建筑结构保留完整；但暗部剪切偏多，天空层次仍有提升空间。",
+        image: "/portfolio/showcase/street-a.webp",
+      },
+      {
+        id: "B",
+        label: "油画暖调",
+        score: 62,
+        verdict: "needs_work",
+        summary: "暖色砖墙和复古车形成街道氛围，整体仍偏写实，油画感不如 A 明确。",
+        image: "/portfolio/showcase/street-b.webp",
+      },
+      {
+        id: "C",
+        label: "清透街景",
+        score: 65,
+        verdict: "needs_work",
+        summary: "建筑纹理保留最好，但高对比导致亮暗剪切，柔和过渡不足。",
+        image: "/portfolio/showcase/street-c.webp",
+      },
+    ],
+  },
+  {
+    id: "portrait",
+    index: "CASE 02",
+    title: "人像照片 · 日系明亮柔和",
+    prompt: "人像照片-日系明亮柔和人像",
+    scene: "人像",
+    refinements: 1,
+    before: "/portfolio/showcase/portrait-before.webp",
+    recommendedCandidateId: "C",
+    candidates: [
+      {
+        id: "A",
+        label: "清透日系",
+        score: 62,
+        verdict: "needs_work",
+        summary: "肤色自然、方向正确，但树叶光斑和背景高光仍有明显剪切。",
+        image: "/portfolio/showcase/portrait-a.webp",
+      },
+      {
+        id: "B",
+        label: "自然柔肤",
+        score: 72,
+        verdict: "needs_work",
+        summary: "肤色与背景虚化舒适，斑驳光影仍让画面显得偏硬。",
+        image: "/portfolio/showcase/portrait-b.webp",
+      },
+      {
+        id: "C",
+        label: "柔光胶片",
+        score: 93,
+        verdict: "pass",
+        summary: "肤色自然通透，明亮柔和且没有明显裁切，最符合日系人像意图。",
+        image: "/portfolio/showcase/portrait-c.webp",
+      },
+    ],
+  },
+  {
+    id: "landscape",
+    index: "CASE 03",
+    title: "山湖风光 · 震撼感",
+    prompt: "风景-山湖风光，震撼感",
+    scene: "山湖风光",
+    refinements: 2,
+    before: "/portfolio/showcase/landscape-before.webp",
+    recommendedCandidateId: "A",
+    candidates: [
+      {
+        id: "A",
+        label: "自然通透",
+        score: 68,
+        verdict: "needs_work",
+        summary: "秋色前景与冰川湖形成冷暖张力，构图有震撼感；天空和暗部动态范围仍需收敛。",
+        image: "/portfolio/showcase/landscape-a.webp",
+      },
+      {
+        id: "B",
+        label: "电影震撼",
+        score: 60,
+        verdict: "needs_work",
+        summary: "远景冷暖关系明确，但前景树枝暗部压得过重，细节损失明显。",
+        image: "/portfolio/showcase/landscape-b.webp",
+      },
+      {
+        id: "C",
+        label: "鲜明秋色",
+        score: 62,
+        verdict: "needs_work",
+        summary: "红叶与湖水更突出，但天空高光剪切较多，整体曝光偏亮。",
+        image: "/portfolio/showcase/landscape-c.webp",
+      },
+    ],
+  },
+];
 const boundaries = [
   { good: true, text: "参考图追色与自然语言氛围描述" },
   { good: true, text: "在本地确定性渲染并导出 PNG" },
@@ -99,11 +210,12 @@ export function XintuPortfolio() {
           <a href="#product">产品判断</a>
           <a href="#workflow">工作流</a>
           <a href="#evidence">项目证据</a>
+          <a href="#cases">真实案例</a>
           <a href="#boundary">边界</a>
         </nav>
 
-        <a className={styles.navCta} href="#evidence">
-          查看证据 <ArrowDown size={14} />
+        <a className={styles.navCta} href="#cases">
+          查看真实案例 <ArrowDown size={14} />
         </a>
       </header>
 
@@ -126,8 +238,8 @@ export function XintuPortfolio() {
             </p>
 
             <div className={styles.heroActions}>
-              <a className={styles.primaryCta} href="#evidence">
-                查看产品演示 <ArrowDown size={16} />
+              <a className={styles.primaryCta} href="#cases">
+                查看真实案例 <ArrowDown size={16} />
               </a>
               <a className={styles.secondaryCta} href={demoUrl} target="_blank" rel="noreferrer">
                 打开 Live Demo <ArrowUpRight size={15} />
@@ -334,10 +446,38 @@ export function XintuPortfolio() {
           </div>
         </section>
 
+        <section className={`${styles.section} ${styles.showcaseSection}`} id="cases">
+          <div className={styles.showcaseHeader}>
+            <div>
+              <p className={styles.sectionIndex}>05 / REAL QWEN RUNS</p>
+              <h2>真实跑过。<br />优点和问题一起展示。</h2>
+            </div>
+            <div className={styles.showcaseIntro}>
+              <p>
+                2026-11-06 使用 <strong>qwen3.8-flash</strong> 通过 DashScope 真实分析，
+                每组完成自动修正、Canvas 2D 渲染和模型视觉复核。
+              </p>
+              <div className={styles.showcaseMeta}>
+                <span>QWEN 3.8 FLASH</span>
+                <span>3 组实跑</span>
+                <span>9 个候选</span>
+                <a href={`${assetBase}/portfolio/showcase/qwen-cases.json`} target="_blank" rel="noreferrer">
+                  查看运行记录 <ArrowUpRight size={13} />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <QwenCaseGallery assetBase={assetBase} cases={showcaseCases} />
+
+          <p className={styles.showcaseFootnote}>
+            真实运行案例，不是实时调用预览。模型输出会随输入与版本变化；公开 Demo 在 Provider 不可用时仍会明确回退到 LOCAL DEMO。
+          </p>
+        </section>
         <section className={styles.section} id="role">
           <div className={styles.sectionHeader}>
             <div>
-              <p className={styles.sectionIndex}>05 / MY ROLE</p>
+              <p className={styles.sectionIndex}>06 / MY ROLE</p>
               <h2>从问题定义<br />到真实上线。</h2>
             </div>
             <p className={styles.sectionLead}>
@@ -380,7 +520,7 @@ export function XintuPortfolio() {
 
         <section className={`${styles.section} ${styles.boundarySection}`} id="boundary">
           <div className={styles.boundaryIntro}>
-            <p className={styles.sectionIndex}>06 / BOUNDARIES & REFLECTION</p>
+            <p className={styles.sectionIndex}>07 / BOUNDARIES & REFLECTION</p>
             <h2>边界不是限制，<br />是产品的一部分。</h2>
             <p>
               AI 产品的可信度，不只来自能力上限，也来自它是否知道自己何时应该停下来。
