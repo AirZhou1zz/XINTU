@@ -1,0 +1,742 @@
+{
+  "generatedAt": "2026-11-06T06:50:55.471Z",
+  "model": "qwen3.8-flash",
+  "endpoint": "DashScope",
+  "cases": [
+    {
+      "id": "street",
+      "title": "电影照片 · 油画感街道",
+      "prompt": "电影照片-油画感街道",
+      "strength": "high",
+      "provider": "qwen-openai-compatible",
+      "model": "qwen3.8-flash",
+      "endpoint": "DashScope",
+      "generatedAt": "2026-11-06T06:48:56.157Z",
+      "sceneHints": {
+        "averageLuma": 0.3688441249832455,
+        "clippingRatio": 0.070607421875,
+        "skinRatio": 0.17780078125,
+        "centralSkinRatio": 0.09956640625,
+        "skyRatio": 0.221365234375,
+        "natureRatio": 0.000462890625,
+        "waterRatio": 0.16833203125,
+        "aspectRatio": 0.8,
+        "temperatureBias": 0.0005847656250047328
+      },
+      "plan": {
+        "intent": "电影感油画街道，强化砖墙暖色与天空冷调的对比",
+        "sceneSummary": "欧洲老城街道，砖砌建筑与钟楼为主体，复古车与路面构成纵深，环境主导",
+        "sceneCategory": "city",
+        "sceneConfidence": 0.92,
+        "directions": [
+          {
+            "id": "A",
+            "label": "电影胶片",
+            "description": "压高光抬阴影，暖橙砖墙配青蓝天空，轻微颗粒",
+            "style": "cinematic"
+          },
+          {
+            "id": "B",
+            "label": "油画暖调",
+            "description": "提升红橙饱和与对比，营造厚重油画质感",
+            "style": "warm_film"
+          },
+          {
+            "id": "C",
+            "label": "清透街景",
+            "description": "保留通透天空与路面纹理，色彩鲜明而不失真",
+            "style": "vivid"
+          }
+        ],
+        "tools": [
+          "global_grade",
+          "curve",
+          "hsl",
+          "lut"
+        ],
+        "constraints": [
+          "no pixel generation"
+        ]
+      },
+      "autoRefinements": 2,
+      "refinementHistory": [
+        {
+          "iteration": 1,
+          "rationale": "针对高光与阴影剪切偏多，降低曝光与对比以恢复层次；轻微回调高光压制和阴影提升，保留电影油画感街道氛围。",
+          "findings": [
+            "高光或阴影剪切偏多，需要降低曝光和对比。"
+          ]
+        },
+        {
+          "iteration": 2,
+          "rationale": "针对高光与阴影剪切偏多，轻微降低曝光并明显降低对比，同时小幅压高光、提阴影以恢复细节，保留电影感油画街道氛围。",
+          "findings": []
+        }
+      ],
+      "candidates": [
+        {
+          "id": "A",
+          "label": "电影胶片",
+          "description": "压高光抬阴影，暖橙砖墙配青蓝天空，轻微颗粒",
+          "params": {
+            "exposure": -12,
+            "contrast": 26,
+            "temperature": 1,
+            "tint": 15,
+            "saturation": 1,
+            "highlights": -51,
+            "shadows": 42,
+            "clarity": -5,
+            "dehaze": 5,
+            "grain": 23,
+            "vignette": -7,
+            "skinWarmth": 0,
+            "skyTemperature": -8
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 0,
+            "skyShift": 7.625474650691741,
+            "structureScore": 0.9983460511068593,
+            "clippingRatio": 0.1789609375,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 70,
+            "summary": "画面呈现出浓郁的红砖油画质感与电影氛围，结构保留优秀，肤色自然无偏移；但剪切比例偏高，暗部死黑与天空偏移削弱了整体层次，尚未完全达标。",
+            "strengths": [
+              "油画感与电影氛围营造到位，砖墙色彩浓郁统一",
+              "结构得分极高，建筑与街道细节清晰完整",
+              "肤色偏移为零，人物表现自然"
+            ],
+            "issues": [
+              "高光与阴影剪切偏多，暗部细节丢失严重",
+              "天空色彩偏移明显，缺乏渐变层次",
+              "整体对比度过高，拱门与车底陷入死黑"
+            ],
+            "nextActions": [
+              "降低对比度与曝光，提亮暗部恢复细节",
+              "重新平衡天空色调，减小色偏并保留层次",
+              "柔化高光，避免白色建筑与天空过曝"
+            ]
+          },
+          "image": "/portfolio/showcase/street-a.webp"
+        },
+        {
+          "id": "B",
+          "label": "油画暖调",
+          "description": "提升红橙饱和与对比，营造厚重油画质感",
+          "params": {
+            "exposure": -12,
+            "contrast": 8,
+            "temperature": 42,
+            "tint": 12,
+            "saturation": 39,
+            "highlights": -32,
+            "shadows": 28,
+            "clarity": 8,
+            "dehaze": 5,
+            "grain": 24,
+            "vignette": -1,
+            "skinWarmth": 0,
+            "skyTemperature": -8
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 0,
+            "skyShift": 7.644897326157076,
+            "structureScore": 0.9994676679124375,
+            "clippingRatio": 0.210892578125,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 62,
+            "summary": "整体具备电影感街道氛围，建筑结构和暖色砖墙表现较好，但高光与阴影剪切偏多，天空处理略平，油画感还不够明确。",
+            "strengths": [
+              "街道透视和建筑层次清晰，画面稳定",
+              "暖调砖墙与复古车形成较好的电影氛围",
+              "人物与车辆细节保留尚可，没有明显肤色异常"
+            ],
+            "issues": [
+              "高光或阴影剪切偏多，暗部细节和亮部层次不足",
+              "天空色相偏移较明显，过渡偏硬，缺少柔和的电影天空",
+              "整体更像写实暖调，尚未形成足够强的油画质感"
+            ],
+            "nextActions": [
+              "降低曝光和对比，优先恢复暗部与亮部细节",
+              "柔化天空过渡，减少色偏并保留云层层次",
+              "增强笔触感和色彩融合，提升油画氛围但避免过度涂抹"
+            ]
+          },
+          "image": "/portfolio/showcase/street-b.webp"
+        },
+        {
+          "id": "C",
+          "label": "清透街景",
+          "description": "保留通透天空与路面纹理，色彩鲜明而不失真",
+          "params": {
+            "exposure": -12,
+            "contrast": 23,
+            "temperature": 19,
+            "tint": 1,
+            "saturation": 58,
+            "highlights": -24,
+            "shadows": 20,
+            "clarity": 24,
+            "dehaze": 19,
+            "grain": 12,
+            "vignette": 12,
+            "skinWarmth": 0,
+            "skyTemperature": -8
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 0,
+            "skyShift": 4.747967232207118,
+            "structureScore": 0.9990724363151285,
+            "clippingRatio": 0.27526171875,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 65,
+            "summary": "画面结构保留良好，但曝光和对比度过高导致严重的明暗剪切，削弱了预期的‘油画感’柔和氛围。",
+            "strengths": [
+              "建筑结构和纹理细节保留完整 (structureScore高)。",
+              "暖色调的砖墙营造了一定的复古街道氛围。"
+            ],
+            "issues": [
+              "高光与阴影剪切比例过高 (27.5%)，导致天空过曝和暗部死黑。",
+              "对比度过强，破坏了‘油画感’所需的柔和过渡和色彩融合。"
+            ],
+            "nextActions": [
+              "降低整体曝光和对比度，找回高光和暗部细节。",
+              "调整色调曲线，使明暗过渡更加柔和，增强油画般的笔触感和氛围。",
+              "稍微压低天空的高光，避免过曝带来的色彩断层。"
+            ]
+          },
+          "image": "/portfolio/showcase/street-c.webp"
+        }
+      ],
+      "recommendedCandidateId": "A",
+      "before": "/portfolio/showcase/street-before.webp",
+      "finalEvaluation": {
+        "pass": true,
+        "deltaE": null,
+        "skinShift": 0,
+        "skyShift": 6.891013062835302,
+        "structureScore": 0.9997969689084775,
+        "clippingRatio": 0.072794921875,
+        "schemaValid": true,
+        "findings": [],
+        "nextAction": "accept"
+      }
+    },
+    {
+      "id": "portrait",
+      "title": "人像照片 · 日系明亮柔和",
+      "prompt": "人像照片-日系明亮柔和人像",
+      "strength": "medium",
+      "provider": "qwen-openai-compatible",
+      "model": "qwen3.8-flash",
+      "endpoint": "DashScope",
+      "generatedAt": "2026-11-06T06:49:55.842Z",
+      "sceneHints": {
+        "averageLuma": 0.4726556143465778,
+        "clippingRatio": 0.1068153980752406,
+        "skinRatio": 0.12949912510936132,
+        "centralSkinRatio": 0.12171041119860017,
+        "skyRatio": 0.07376640419947507,
+        "natureRatio": 0.03017716535433071,
+        "waterRatio": 0.2317607174103237,
+        "aspectRatio": 0.714375,
+        "temperatureBias": -0.006628643233321801
+      },
+      "plan": {
+        "intent": "日系明亮柔和人像",
+        "sceneSummary": "侧面近景人像，人物占据画面主体，背景为街道与建筑虚化，阳光在头发和牛仔外套上形成斑驳光影",
+        "sceneCategory": "portrait",
+        "sceneConfidence": 0.93,
+        "directions": [
+          {
+            "id": "A",
+            "label": "清透日系",
+            "description": "提高整体亮度，降低对比与清晰度，营造干净通透的空气感",
+            "style": "airy"
+          },
+          {
+            "id": "B",
+            "label": "自然柔肤",
+            "description": "保护肤色真实感，轻微提亮阴影，让面部过渡更柔和",
+            "style": "natural"
+          },
+          {
+            "id": "C",
+            "label": "柔光胶片",
+            "description": "保留阳光氛围，柔化高光与暗部反差，呈现温和的日系质感",
+            "style": "soft"
+          }
+        ],
+        "tools": [
+          "global_grade",
+          "skin_protect",
+          "curve",
+          "hsl"
+        ],
+        "constraints": [
+          "no pixel generation"
+        ]
+      },
+      "autoRefinements": 1,
+      "refinementHistory": [
+        {
+          "iteration": 1,
+          "rationale": "降低曝光并进一步减弱对比，同时压高光、提阴影，以缓解剪切并保留日系明亮柔和的人像质感。",
+          "findings": []
+        }
+      ],
+      "candidates": [
+        {
+          "id": "A",
+          "label": "清透日系",
+          "description": "提高整体亮度，降低对比与清晰度，营造干净通透的空气感",
+          "params": {
+            "exposure": 20,
+            "contrast": -12,
+            "temperature": -3,
+            "tint": 0,
+            "saturation": 7,
+            "highlights": -28,
+            "shadows": 24,
+            "clarity": 2,
+            "dehaze": 16,
+            "grain": 0,
+            "vignette": -8,
+            "skinWarmth": 2,
+            "skyTemperature": 0
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 6.380134569408663,
+            "skyShift": 6.750447355781918,
+            "structureScore": 0.9981064521294403,
+            "clippingRatio": 0.12402668416447944,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 62,
+            "summary": "整体色调明亮、肤色还原尚可，但背景与树叶光斑处高光剪切偏多，斑驳硬光削弱了日系柔和氛围。",
+            "strengths": [
+              "肤色自然，未出现明显偏色或脏感",
+              "画面结构清晰，人物主体突出",
+              "整体亮度与日系明亮风格方向一致"
+            ],
+            "issues": [
+              "clippingRatio 约 12%，背景建筑与光斑处高光溢出明显",
+              "树影光斑造成面部与衣物局部强对比，不够柔和",
+              "skyShift 偏高，背景亮部色相略漂移"
+            ],
+            "nextActions": [
+              "降低高光/曝光，恢复背景与光斑细节，减少剪切",
+              "加入柔光或降低局部对比，使斑驳光更均匀柔和",
+              "微调背景与天空色相，使其与日系清新调性统一"
+            ]
+          },
+          "image": "/portfolio/showcase/portrait-a.webp"
+        },
+        {
+          "id": "B",
+          "label": "自然柔肤",
+          "description": "保护肤色真实感，轻微提亮阴影，让面部过渡更柔和",
+          "params": {
+            "exposure": 13,
+            "contrast": -3,
+            "temperature": 3,
+            "tint": 0,
+            "saturation": 5,
+            "highlights": -26,
+            "shadows": 20,
+            "clarity": -4,
+            "dehaze": -6,
+            "grain": 0,
+            "vignette": -4,
+            "skinWarmth": 2,
+            "skyTemperature": 0
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 3.686167650861439,
+            "skyShift": 3.9017680203133516,
+            "structureScore": 0.9994020069861863,
+            "clippingRatio": 0.11502187226596676,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 72,
+            "summary": "整体氛围接近日系明亮柔和人像，肤色自然、背景虚化舒适，但高光剪切偏多，斑驳光影使对比略硬，柔和感不足。",
+            "strengths": [
+              "肤色还原自然，未出现明显偏色",
+              "背景虚化与景深处理得当，主体突出",
+              "明亮通透的基调符合日系风格"
+            ],
+            "issues": [
+              "高光剪切比例偏高，背景与光斑细节丢失",
+              "面部斑驳光影对比过强，削弱了柔和感",
+              "整体曝光略高，需控制高光溢出"
+            ],
+            "nextActions": [
+              "降低高光并轻微压暗曝光，找回光斑与背景细节",
+              "柔化面部光影对比，使肤色过渡更均匀",
+              "微调曲线提升暗部层次，增强日系柔和质感"
+            ]
+          },
+          "image": "/portfolio/showcase/portrait-b.webp"
+        },
+        {
+          "id": "C",
+          "label": "柔光胶片",
+          "description": "保留阳光氛围，柔化高光与暗部反差，呈现温和的日系质感",
+          "params": {
+            "exposure": 13,
+            "contrast": -18,
+            "temperature": 3,
+            "tint": 0,
+            "saturation": 1,
+            "highlights": -40,
+            "shadows": 32,
+            "clarity": -19,
+            "dehaze": -6,
+            "grain": 4,
+            "vignette": -4,
+            "skinWarmth": 2,
+            "skyTemperature": 0
+          },
+          "evaluation": {
+            "pass": true,
+            "deltaE": null,
+            "skinShift": 4.312672355580253,
+            "skyShift": 4.6226850407292,
+            "structureScore": 0.9991736710174802,
+            "clippingRatio": 0,
+            "schemaValid": true,
+            "findings": [],
+            "nextAction": "accept"
+          },
+          "review": {
+            "verdict": "pass",
+            "score": 93,
+            "summary": "整体符合日系明亮柔和人像意图，肤色自然通透，画面结构完整，无明显高光或暗部裁切。",
+            "strengths": [
+              "肤色保留良好，明亮柔和且不过度偏色",
+              "整体色调干净通透，符合日系人像氛围",
+              "结构与细节完整，无裁切风险"
+            ],
+            "issues": [
+              "背景高光区域略强，可能轻微分散主体注意力",
+              "树影落在头发和肩部，局部明暗对比稍显复杂"
+            ],
+            "nextActions": [
+              "可轻微压低背景高光，让主体更突出",
+              "可微调面部阴影过渡，使柔和感更均匀",
+              "保持当前肤色与整体亮度，无需大幅改动"
+            ]
+          },
+          "image": "/portfolio/showcase/portrait-c.webp"
+        }
+      ],
+      "recommendedCandidateId": "C",
+      "before": "/portfolio/showcase/portrait-before.webp",
+      "finalEvaluation": {
+        "pass": true,
+        "deltaE": null,
+        "skinShift": 2.547199252517606,
+        "skyShift": 2.6510245845739178,
+        "structureScore": 0.999782718721925,
+        "clippingRatio": 0.00033027121609798774,
+        "schemaValid": true,
+        "findings": [],
+        "nextAction": "accept"
+      }
+    },
+    {
+      "id": "landscape",
+      "title": "山湖风光 · 震撼感",
+      "prompt": "风景-山湖风光，震撼感",
+      "strength": "high",
+      "provider": "qwen-openai-compatible",
+      "model": "qwen3.8-flash",
+      "endpoint": "DashScope",
+      "generatedAt": "2026-11-06T06:50:55.471Z",
+      "sceneHints": {
+        "averageLuma": 0.3918285227894747,
+        "clippingRatio": 0.13614453125,
+        "skinRatio": 0.089392578125,
+        "centralSkinRatio": 0.030984375,
+        "skyRatio": 0.1506875,
+        "natureRatio": 0.035154296875,
+        "waterRatio": 0.132302734375,
+        "aspectRatio": 0.8,
+        "temperatureBias": 0.03030339307604081
+      },
+      "plan": {
+        "intent": "enhance mountain lake scenery with dramatic impact",
+        "sceneSummary": "autumn foliage frames a glacial lake and jagged snow-capped peaks under moody overcast sky",
+        "sceneCategory": "landscape",
+        "sceneConfidence": 0.95,
+        "directions": [
+          {
+            "id": "A",
+            "label": "自然通透",
+            "description": "balanced contrast with clear air and true-to-life autumn tones",
+            "style": "natural"
+          },
+          {
+            "id": "B",
+            "label": "电影震撼",
+            "description": "deepened shadows, teal-orange grade and dramatic clarity for epic feel",
+            "style": "cinematic"
+          },
+          {
+            "id": "C",
+            "label": "鲜明秋色",
+            "description": "boosted saturation on foliage and lake for vivid high-impact look",
+            "style": "vivid"
+          }
+        ],
+        "tools": [
+          "global_grade",
+          "sky_balance",
+          "hsl",
+          "texture"
+        ],
+        "constraints": [
+          "no pixel generation"
+        ]
+      },
+      "autoRefinements": 2,
+      "refinementHistory": [
+        {
+          "iteration": 1,
+          "rationale": "降低曝光和对比以缓解高光与阴影剪切，同时轻微回收高光、提升阴影，保留山湖风光的层次与震撼感。",
+          "findings": [
+            "高光或阴影剪切偏多，需要降低曝光和对比。"
+          ]
+        },
+        {
+          "iteration": 2,
+          "rationale": "降低曝光和对比，并进一步压暗高光、轻微提亮阴影，以缓解高光与阴影剪切，同时保留山湖风光的震撼层次。",
+          "findings": [
+            "高光或阴影剪切偏多，需要降低曝光和对比。"
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "id": "A",
+          "label": "自然通透",
+          "description": "balanced contrast with clear air and true-to-life autumn tones",
+          "params": {
+            "exposure": 3,
+            "contrast": 14,
+            "temperature": -8,
+            "tint": 1,
+            "saturation": 23,
+            "highlights": -34,
+            "shadows": 14,
+            "clarity": 26,
+            "dehaze": 26,
+            "grain": 9,
+            "vignette": -9,
+            "skinWarmth": 0,
+            "skyTemperature": -9
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 0,
+            "skyShift": 3.358612935974394,
+            "structureScore": 0.9992119587327594,
+            "clippingRatio": 0.3582265625,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 68,
+            "summary": "画面构图与冷暖对比契合山湖震撼感，但高光与阴影剪切偏多，动态范围受限，氛围略显压抑。",
+            "strengths": [
+              "前景秋色暖调与背景冰川湖冷调形成强烈互补，色彩和谐且具戏剧张力",
+              "云雾山峰与暗调树枝框景营造出用户期望的震撼氛围",
+              "结构保留优秀，山体与枝叶细节清晰"
+            ],
+            "issues": [
+              "高光剪切偏多，天空与云层发白、细节丢失",
+              "前景树枝阴影压得过黑，暗部层次不足",
+              "整体对比偏高，削弱了震撼感应有的通透与纵深"
+            ],
+            "nextActions": [
+              "适度降低高光并提亮阴影，减少剪切比例",
+              "微调曲线以找回云层与暗部枝叶的细节层次",
+              "在保留冷暖对比的前提下轻微降低整体反差，提升动态范围"
+            ]
+          },
+          "image": "/portfolio/showcase/landscape-a.webp"
+        },
+        {
+          "id": "B",
+          "label": "电影震撼",
+          "description": "deepened shadows, teal-orange grade and dramatic clarity for epic feel",
+          "params": {
+            "exposure": -4,
+            "contrast": 28,
+            "temperature": -16,
+            "tint": 15,
+            "saturation": 1,
+            "highlights": -63,
+            "shadows": 35,
+            "clarity": 7,
+            "dehaze": 26,
+            "grain": 20,
+            "vignette": -28,
+            "skinWarmth": 0,
+            "skyTemperature": -9
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 0,
+            "skyShift": 3.3402751558475,
+            "structureScore": 0.9973899419215629,
+            "clippingRatio": 0.35130859375,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 60,
+            "summary": "画面构图和冷暖色彩对比营造了不错的山湖震撼感，但曝光控制不佳，前景树枝暗部剪切严重，缺乏细节。",
+            "strengths": [
+              "前景树叶与背景雪山、湖水形成良好的冷暖色彩对比",
+              "构图层次分明，有效传达出山湖风光的震撼感",
+              "整体结构得分高，视觉引导线清晰"
+            ],
+            "issues": [
+              "前景树枝暗部大面积死黑，细节丢失严重（高光或阴影剪切偏多）",
+              "整体对比度过高，导致画面部分区域观感生硬"
+            ],
+            "nextActions": [
+              "适当降低整体对比度",
+              "提亮前景暗部，恢复树枝和树叶的细节层次",
+              "微调天空高光区域，使云层过渡更自然"
+            ]
+          },
+          "image": "/portfolio/showcase/landscape-b.webp"
+        },
+        {
+          "id": "C",
+          "label": "鲜明秋色",
+          "description": "boosted saturation on foliage and lake for vivid high-impact look",
+          "params": {
+            "exposure": -4,
+            "contrast": 26,
+            "temperature": 1,
+            "tint": 1,
+            "saturation": 58,
+            "highlights": -36,
+            "shadows": 14,
+            "clarity": 36,
+            "dehaze": 39,
+            "grain": 9,
+            "vignette": -9,
+            "skinWarmth": 0,
+            "skyTemperature": -9
+          },
+          "evaluation": {
+            "pass": false,
+            "deltaE": null,
+            "skinShift": 0,
+            "skyShift": 3.560466955288678,
+            "structureScore": 0.9985333602182714,
+            "clippingRatio": 0.42474609375,
+            "schemaValid": true,
+            "findings": [
+              "高光或阴影剪切偏多，需要降低曝光和对比。"
+            ],
+            "nextAction": "refine"
+          },
+          "review": {
+            "verdict": "needs_work",
+            "score": 62,
+            "summary": "构图框架与山湖层次具备震撼感，但天空及云层高光剪切严重，整体曝光偏高，削弱了氛围。",
+            "strengths": [
+              "前景红叶枝桠形成天然画框，层次与纵深感强",
+              "青绿湖水与冷调雪山形成冷暖对比，色彩和谐",
+              "山体结构与云雾轮廓保留完整，震撼感基调成立"
+            ],
+            "issues": [
+              "天空与云层大面积泛白，高光剪切比例约42%，细节丢失",
+              "整体曝光偏高，对比过强导致暗部枝桠趋于死黑",
+              "天空偏移明显，缺乏通透的蓝调，削弱山湖氛围"
+            ],
+            "nextActions": [
+              "压暗高光并恢复云层纹理，将剪切比例降至合理范围",
+              "适度降低整体曝光与对比，找回前景暗部层次",
+              "微调天空色相向冷蓝偏移，增强通透感与震撼氛围"
+            ]
+          },
+          "image": "/portfolio/showcase/landscape-c.webp"
+        }
+      ],
+      "recommendedCandidateId": "A",
+      "before": "/portfolio/showcase/landscape-before.webp",
+      "finalEvaluation": {
+        "pass": false,
+        "deltaE": null,
+        "skinShift": 0,
+        "skyShift": 2.01753546947246,
+        "structureScore": 0.9996181484874852,
+        "clippingRatio": 0.26019140625,
+        "schemaValid": true,
+        "findings": [
+          "高光或阴影剪切偏多，需要降低曝光和对比。"
+        ],
+        "nextAction": "refine"
+      }
+    }
+  ]
+}
