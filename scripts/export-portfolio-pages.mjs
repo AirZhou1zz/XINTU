@@ -1,4 +1,4 @@
-import fs from "node:fs";
+﻿import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -29,6 +29,7 @@ fs.mkdirSync(path.join(buildDir, "components", "portfolio"), { recursive: true }
 fs.mkdirSync(path.join(buildDir, "public"), { recursive: true });
 
 copy("components/portfolio/xintu-portfolio.tsx", path.join(buildDir, "components", "portfolio", "xintu-portfolio.tsx"));
+copy("components/portfolio/qwen-case-gallery.tsx", path.join(buildDir, "components", "portfolio", "qwen-case-gallery.tsx"));
 copy("components/portfolio/xintu-portfolio.module.css", path.join(buildDir, "components", "portfolio", "xintu-portfolio.module.css"));
 copy("app/styles/tokens.css", path.join(buildDir, "app", "styles", "tokens.css"));
 copy("app/styles/base.css", path.join(buildDir, "app", "styles", "base.css"));
